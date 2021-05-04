@@ -14,8 +14,8 @@ async def upload_file(session: BaseClient = Depends(get_boto), file: UploadFile 
     """
     Retrieve contracts
     """
-    await session.put_object(Bucket='klipp', Key=f'jonas/{file.filename}', Body=await file.read())
-    # session.put_object(Bucket='klipp', key='test', Body='lol')
+    await session.put_object(Bucket='klepp', Key=f'jonas/{file.filename}', Body=await file.read())
+    # session.put_object(Bucket='klepp', key='test', Body='lol')
     return {'filename': file.filename, 'type': file.content_type}
 
 

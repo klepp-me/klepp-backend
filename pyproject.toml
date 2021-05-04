@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "klipp"
+name = "klepp"
 version = "0.1.0"
 description = "API for uploading/deleting S3 files"
 authors = [

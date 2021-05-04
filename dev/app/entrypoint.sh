@@ -2,7 +2,7 @@
 
 echo "Waiting for postgres..."
 
-while ! nc -z klipp-postgres-db 5432; do
+while ! nc -z klepp-postgres-db 5432; do
   sleep 0.1
 done
 

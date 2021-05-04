@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  klipp-api:
+  klepp-api:
     build:
       context: .
       dockerfile: dev/app/Dockerfile
@@ -15,9 +15,9 @@ services:
       - ENVIRONMENT=dev
       - TESTING=1
     depends_on:
-      - klipp-postgres-db
+      - klepp-postgres-db
 
-  klipp-postgres-db:
+  klepp-postgres-db:
     build:
       context: .
       dockerfile: dev/db/Dockerfile

@@ -36,7 +36,7 @@ class Settings(Credentials):
             return value
         raise ValueError(value)
 
-    PROJECT_NAME: str = 'klipp'
+    PROJECT_NAME: str = 'klepp'
     SENTRY_DSN: Optional[HttpUrl] = None
 
     @validator('SENTRY_DSN', pre=True)
