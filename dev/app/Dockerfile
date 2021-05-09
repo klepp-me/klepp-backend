@@ -30,4 +30,4 @@ COPY ../../app .
 COPY dev/app/entrypoint.sh .
 RUN chmod +x /usr/src/app/entrypoint.sh
 
-ENTRYPOINT ["/bin/sh",  "-c", "/usr/src/app/entrypoint.sh"]
+ENTRYPOINT /bin/sh -c /usr/src/app/entrypoint.sh

@@ -5,9 +5,8 @@ services:
     build:
       context: .
       dockerfile: dev/app/Dockerfile
-    command: uvicorn main:app --reload --workers 1 --host 0.0.0.0 --port 8004
     volumes:
-      - ${PWD}/app:/usr/src/app:Z
+      - ${PWD}/app:/app:Z
     ports:
       - 127.0.0.1:8004:8004
     env_file: ${PWD}/.env
