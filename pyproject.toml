@@ -11,7 +11,6 @@ license = "MIT"
 python = "^3.9"
 fastapi = "^0.63.0"
 uvicorn = {extras = ["standard"], version = "^0.13.4"}
-python-decouple = "^3.4"
 python-multipart = "^0.0.5"
 aioboto3 = "^8.3.0"
 aioaws = "^0.8"
@@ -28,6 +27,7 @@ pytest-cov = "^2.11.1"
 pytest-asyncio = "^0.14.0"
 pytest-mock = "^3.5.1"
 isort = "^5.8.0"
+mypy = "^0.812"
 
 [tool.black]
 line-length = 120

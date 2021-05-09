@@ -1,24 +1,22 @@
 from functools import lru_cache
 from typing import List, Optional, Union
 
-from decouple import config
-from pydantic import AnyHttpUrl, BaseSettings, HttpUrl, validator
+from pydantic import AnyHttpUrl, BaseSettings, Field, HttpUrl, validator
 from pydantic.networks import AnyUrl
 
 
 class Credentials(BaseSettings):
-    AWS_ACCESS_KEY_ID = config('AWS_ID')
-    AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_KEY')
-
-    DATABASE_URL: AnyUrl = config('DATABASE_URL')
+    AWS_ACCESS_KEY_ID: str = Field(..., env='AWS_ID')
+    AWS_SECRET_ACCESS_KEY: str = Field(..., env='AWS_SECRET_KEY')
+    DATABASE_URL: AnyUrl = Field(..., env='DATABASE_URL')
 
 
 class Settings(Credentials):
     API_V1_STR: str = '/api/v1'
 
-    ENVIRONMENT: str = config('ENVIRONMENT', 'dev')
-    TESTING: bool = config('TESTING', False)
-    SECRET_KEY: str = config('SECRET_KEY', None)
+    ENVIRONMENT: str = Field('dev', env='ENVIRONMENT')
+    TESTING: bool = Field(False, env='TESTING')
+    SECRET_KEY: str = Field(..., env='SECRET_KEY')
 
     # BACKEND_CORS_ORIGINS is a JSON-formatted list of origins
     # e.g: '["http://localhost", "http://localhost:4200", "http://localhost:3000", \
@@ -49,6 +47,8 @@ class Settings(Credentials):
         return value
 
     class Config:  # noqa
+        env_file = '../.env'
+        env_file_encoding = 'utf-8'
         case_sensitive = True
 
 
