@@ -30,6 +30,8 @@ isort = "^5.8.0"
 mypy = "^0.812"
 aioresponses = "^0.7.2"
 requests = "^2.25.1"
+pytest-dotenv = "^0.5.2"
+pytest-socket = "^0.4.0"
 
 [tool.black]
 line-length = 120

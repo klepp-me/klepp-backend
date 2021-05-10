@@ -2,6 +2,7 @@
 .idea/*
 env/
 .env
+.env.test
 venv/
 .venv/
 build/

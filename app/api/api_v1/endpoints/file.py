@@ -1,23 +1,22 @@
-from typing import Any
-
 from aiobotocore.client import BaseClient
 from fastapi import APIRouter, Depends, UploadFile
 
 from api.dependencies import file_format, get_boto
-from core.config import Settings, load_settings
+from core.config import settings
 from schemas.file import DeletedFileResponse, FileResponse, ListFilesResponse
 
 router = APIRouter()
 
 
-@router.post('/file/')
-async def upload_file(session: BaseClient = Depends(get_boto), file: UploadFile = Depends(file_format)) -> Any:
+@router.post('/file/', response_model=FileResponse)
+async def upload_file(session: BaseClient = Depends(get_boto), file: UploadFile = Depends(file_format)) -> FileResponse:
     """
     Retrieve contracts
     """
     await session.put_object(Bucket='kleppcat', Key=f'jonas/haha/{file.filename}', Body=await file.read())
-    # session.put_object(Bucket='klepp', key='test', Body='lol')
-    return {'filename': file.filename, 'type': file.content_type}
+    return FileResponse(
+        file_name=file.filename, uri=f'https://kleppcat.s3.eu-north-1.amazonaws.com/jonas/haha{file.filename}'
+    )
 
 
 @router.delete('/file/{file_name}', response_model=DeletedFileResponse)
@@ -48,7 +47,7 @@ async def get_all_files(session: BaseClient = Depends(get_boto)) -> ListFilesRes
 
 
 @router.get('/ping')
-async def pong(settings: Settings = Depends(load_settings)) -> dict:
+async def pong() -> dict:
     """
     Ping function for testing
     """

@@ -1,9 +1,9 @@
 from aiobotocore import get_session
 from aiobotocore.session import ClientCreatorContext
-from fastapi import Depends, File, UploadFile
+from fastapi import File, UploadFile
 from fastapi.exceptions import HTTPException
 
-from core.config import Settings, load_settings
+from core.config import settings
 from schemas.file import AllowedFile
 
 
@@ -19,7 +19,7 @@ async def file_format(file: UploadFile = File(...)) -> UploadFile:
 session = get_session()
 
 
-async def get_boto(settings: Settings = Depends(load_settings)) -> ClientCreatorContext:
+async def get_boto() -> ClientCreatorContext:
     """
     Create a boto client which can be shared
     """

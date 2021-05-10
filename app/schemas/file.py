@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import List
 
-from pydantic import AnyUrl, BaseModel
+from pydantic import BaseModel, HttpUrl
 
 
 class AllowedFile(str, Enum):
@@ -14,8 +14,16 @@ class DeletedFileResponse(BaseModel):
 
 class FileResponse(BaseModel):
     file_name: str
-    uri: AnyUrl
+    uri: HttpUrl
 
 
 class ListFilesResponse(BaseModel):
     files: List[FileResponse]
+
+
+class SummaryPayloadSchema(BaseModel):
+    url: str
+
+
+class SummaryResponseSchema(SummaryPayloadSchema):
+    id: int

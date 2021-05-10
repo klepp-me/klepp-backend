@@ -1,4 +1,3 @@
-from functools import lru_cache
 from typing import List, Optional, Union
 
 from pydantic import AnyHttpUrl, BaseSettings, Field, HttpUrl, validator
@@ -52,9 +51,4 @@ class Settings(Credentials):
         case_sensitive = True
 
 
-@lru_cache
-def load_settings() -> Settings:
-    """
-    Load all settings
-    """
-    return Settings()
+settings = Settings()

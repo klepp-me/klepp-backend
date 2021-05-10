@@ -1,30 +1,28 @@
-import os
-
 import pytest
 from fastapi.testclient import TestClient
-from pydantic import Field
+from tortoise.contrib.fastapi import register_tortoise
 
 from app import main
-from app.core.config import Settings, load_settings
-
-
-def get_settings_override():
-    test_db = Field(..., env='DATABASE_TEST_URL')
-    print(test_db)
-    return Settings(testing=1, database_url=test_db)
+from core.config import settings
+from main import create_application
 
 
 @pytest.fixture(scope='module')
-def test_app():
-    # set up
-    main.app.dependency_overrides[load_settings] = get_settings_override
+def test_client():
     with TestClient(main.app) as test_client:
-
-        # testing
         yield test_client
 
-    # tear down
 
-
-def test_lol(test_app):
-    print('hehe')
+@pytest.fixture(scope='module')
+def test_app_with_db():
+    # set up
+    app = create_application()
+    register_tortoise(
+        app,
+        db_url=settings.DATABASE_URL,
+        modules={'models': ['app.models.tortoise']},
+        generate_schemas=True,
+        add_exception_handlers=True,
+    )
+    with TestClient(app) as test_client:
+        yield test_client
