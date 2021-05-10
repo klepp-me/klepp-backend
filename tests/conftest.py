@@ -14,7 +14,7 @@ def test_client():
 
 
 @pytest.fixture(scope='module')
-def test_app_with_db():
+def test_client_with_db():
     # set up
     app = create_application()
     register_tortoise(
