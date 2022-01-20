@@ -1,5 +1,4 @@
-from aiobotocore import get_session
-from aiobotocore.session import ClientCreatorContext
+from aiobotocore.session import ClientCreatorContext, get_session
 from fastapi import Depends, File, UploadFile
 from fastapi.exceptions import HTTPException
 
