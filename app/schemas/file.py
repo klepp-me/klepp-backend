@@ -6,6 +6,7 @@ from pydantic import AnyUrl, BaseModel
 
 class AllowedFile(str, Enum):
     JPEG = 'image/jpeg'
+    MP4 = 'video/mp4'
 
 
 class DeletedFileResponse(BaseModel):
