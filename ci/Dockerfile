@@ -1,5 +1,5 @@
 # pull official base image
-FROM python:3.9.2-slim-buster
+FROM python:3.10.2-slim-bullseye
 
 # set working directory
 WORKDIR /usr/src/app
@@ -18,16 +18,18 @@ RUN apt-get update \
 # install python dependencies
 RUN pip install --upgrade pip
 RUN pip install poetry==1.1.4
-COPY ../../poetry.lock .
-COPY ../../pyproject.toml .
+RUN ls -lat
+
+COPY poetry.lock .
+COPY pyproject.toml .
 RUN poetry install
 
 # add app
-COPY ../../app .
+COPY app .
 
 
 # add entrypoint.sh
-COPY dev/app/entrypoint.sh .
+COPY ci/entrypoint.sh .
 RUN chmod +x /usr/src/app/entrypoint.sh
 
 ENTRYPOINT /bin/sh -c /usr/src/app/entrypoint.sh
