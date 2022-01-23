@@ -1,1 +1,1 @@
-backend: gunicorn -w 3 -k uvicorn.workers.UvicornWorker main:app
+web: gunicorn --pythonpath app -w 3 -k uvicorn.workers.UvicornWorker app.main:app
