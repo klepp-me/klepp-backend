@@ -6,6 +6,7 @@ from pydantic import AnyHttpUrl, BaseSettings, Field
 class AWS(BaseSettings):
     # General
     AWS_REGION: str = Field('eu-north-1')
+    S3_BUCKET_URL: str = Field('gg.klepp.me')
 
     # Auth
     AWS_USER_POOL_ID: str = Field(..., env='AWS_USER_POOL_ID')
@@ -17,6 +18,7 @@ class AWS(BaseSettings):
 
 
 class Settings(AWS):
+    PROJECT_NAME: str = 'klepp.me'
     API_V1_STR: str = '/api/v1'
 
     ENVIRONMENT: str = Field('dev', env='ENVIRONMENT')
@@ -26,8 +28,7 @@ class Settings(AWS):
     # BACKEND_CORS_ORIGINS is a JSON-formatted list of origins
     # e.g: '["http://localhost", "http://localhost:4200", "http://localhost:3000", \
     # "http://localhost:8080", "http://local.dockertoolbox.tiangolo.com"]'
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
-    PROJECT_NAME: str = 'klepp.me'
+    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = ['http://localhost:3000', 'http://localhost:5555']  # type: ignore
 
     class Config:  # noqa
         env_file = '../.env'

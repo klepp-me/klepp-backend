@@ -17,6 +17,7 @@ python-multipart = "^0.0.5"
 aiobotocore = "^2.1.0"
 aioboto3 = "^9.3.1"
 httpx = "^0.21.3"
+pydantic = "1.9.0"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^2.9.3"

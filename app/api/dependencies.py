@@ -1,24 +1,12 @@
-from aiobotocore.session import ClientCreatorContext, get_session
-from fastapi import File, UploadFile
-from fastapi.exceptions import HTTPException
+from aiobotocore.client import AioBaseClient
+from aiobotocore.session import get_session
 
 from core.config import settings
-from schemas.file import AllowedFile
-
-
-async def file_format(file: UploadFile = File(...)) -> UploadFile:
-    """
-    Check file format is allowed
-    """
-    if file.content_type in [AllowedFile.JPEG, AllowedFile.MP4]:  # Rewrite to pydantic, but this hack works for now
-        return file
-    raise HTTPException(status_code=422, detail='File format not accepted')
-
 
 session = get_session()
 
 
-async def get_boto() -> ClientCreatorContext:
+async def get_boto() -> AioBaseClient:
     """
     Create a boto client which can be shared
     """

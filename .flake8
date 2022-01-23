@@ -18,7 +18,8 @@ ignore=
     D100
     # Docstring at the top of a public class (method is enough)
     D101
-    # Missing docstring in __init__
+    # Missing docstring in __init__, nested class
+    D106
     D107
     # Missing docstring in public package
     D104

@@ -80,8 +80,6 @@ class OpenIdConfig:
             openid_response.raise_for_status()
             openid_cfg = openid_response.json()
 
-            self.authorization_endpoint = openid_cfg['authorization_endpoint']
-            self.token_endpoint = openid_cfg['token_endpoint']
             self.issuer = openid_cfg['issuer']
 
             jwks_uri = openid_cfg['jwks_uri']
@@ -104,9 +102,10 @@ class OpenIdConfig:
 
 
 class CognitoAuthorizationCodeBearerBase(SecurityBase):
-    def __init__(self) -> None:
-        self.openid_config: OpenIdConfig = OpenIdConfig()
+    def __init__(self, auto_error: bool = True) -> None:
+        self.auto_error = auto_error
 
+        self.openid_config: OpenIdConfig = OpenIdConfig()
         self.oauth = OAuth2AuthorizationCodeBearer(
             authorizationUrl='https://auth.klepp.me/oauth2/authorize',
             tokenUrl='https://auth.klepp.me/oauth2/token',
@@ -117,79 +116,88 @@ class CognitoAuthorizationCodeBearerBase(SecurityBase):
         self.model = self.oauth.model
         self.scheme_name: str = 'Cognito'
 
-    async def __call__(self, request: Request, security_scopes: SecurityScopes) -> User:
+    async def __call__(self, request: Request, security_scopes: SecurityScopes) -> User | None:
         """
         Extends call to also validate the token.
         """
-        access_token = await self.oauth(request=request)
         try:
-            # Extract header information of the token.
-            header: dict[str, str] = jwt.get_unverified_header(token=access_token) or {}
-            claims: dict[str, Any] = jwt.get_unverified_claims(token=access_token) or {}
-        except Exception as error:
-            log.warning('Malformed token received. %s. Error: %s', access_token, error, exc_info=True)
-            raise InvalidAuth(detail='Invalid token format')
+            access_token = await self.oauth(request=request)
+            try:
+                # Extract header information of the token.
+                header: dict[str, str] = jwt.get_unverified_header(token=access_token) or {}
+                claims: dict[str, Any] = jwt.get_unverified_claims(token=access_token) or {}
+            except Exception as error:
+                log.warning('Malformed token received. %s. Error: %s', access_token, error, exc_info=True)
+                raise InvalidAuth(detail='Invalid token format')
 
-        for scope in security_scopes.scopes:
-            token_scope_string = claims.get('scp', '')
-            if isinstance(token_scope_string, str):
-                token_scopes = token_scope_string.split(' ')
-                if scope not in token_scopes:
-                    raise InvalidAuth('Required scope missing')
-            else:
-                raise InvalidAuth('Token contains invalid formatted scopes')
+            for scope in security_scopes.scopes:
+                token_scope_string = claims.get('scp', '')
+                if isinstance(token_scope_string, str):
+                    token_scopes = token_scope_string.split(' ')
+                    if scope not in token_scopes:
+                        raise InvalidAuth('Required scope missing')
+                else:
+                    raise InvalidAuth('Token contains invalid formatted scopes')
 
-        # Load new config if old
-        await self.openid_config.load_config()
+            # Load new config if old
+            await self.openid_config.load_config()
 
-        # Use the `kid` from the header to find a matching signing key to use
-        try:
-            if key := self.openid_config.signing_keys.get(header.get('kid', '')):
-                # We require and validate all fields in a Cognito token
-                options = {
-                    'verify_signature': True,
-                    'verify_aud': False,
-                    'verify_iat': True,
-                    'verify_exp': True,
-                    'verify_nbf': False,
-                    'verify_iss': True,
-                    'verify_sub': True,
-                    'verify_jti': True,
-                    'verify_at_hash': True,
-                    'require_aud': False,
-                    'require_iat': True,
-                    'require_exp': True,
-                    'require_nbf': False,
-                    'require_iss': True,
-                    'require_sub': True,
-                    'require_jti': False,
-                    'require_at_hash': False,
-                    'leeway': 0,
-                }
-                # Validate token
-                token = jwt.decode(
-                    access_token,
-                    key=key,  # noqa
-                    algorithms=['RS256'],
-                    issuer=self.openid_config.issuer,
-                    options=options,
-                )
-                # Attach the user to the request. Can be accessed through `request.state.user`
-                user: User = User(**token)
-                request.state.user = user
-                return user
-        except JWTClaimsError as error:
-            log.info('Token contains invalid claims. %s', error)
-            raise InvalidAuth(detail='Token contains invalid claims')
-        except ExpiredSignatureError as error:
-            log.info('Token signature has expired. %s', error)
-            raise InvalidAuth(detail='Token signature has expired')
-        except JWTError as error:
-            log.warning('Invalid token. Error: %s', error, exc_info=True)
-            raise InvalidAuth(detail='Unable to validate token')
-        except Exception as error:
-            # Extra failsafe in case of a bug in a future version of the jwt library
-            log.exception('Unable to process jwt token. Uncaught error: %s', error)
-            raise InvalidAuth(detail='Unable to process token')
-        log.warning('Unable to verify token. No signing keys found')
-        raise InvalidAuth(detail='Unable to verify token, no signing keys found')
+            # Use the `kid` from the header to find a matching signing key to use
+            try:
+                if key := self.openid_config.signing_keys.get(header.get('kid', '')):
+                    # We require and validate all fields in a Cognito token
+                    options = {
+                        'verify_signature': True,
+                        'verify_aud': False,
+                        'verify_iat': True,
+                        'verify_exp': True,
+                        'verify_nbf': False,
+                        'verify_iss': True,
+                        'verify_sub': True,
+                        'verify_jti': True,
+                        'verify_at_hash': True,
+                        'require_aud': False,
+                        'require_iat': True,
+                        'require_exp': True,
+                        'require_nbf': False,
+                        'require_iss': True,
+                        'require_sub': True,
+                        'require_jti': False,
+                        'require_at_hash': False,
+                        'leeway': 0,
+                    }
+                    # Validate token
+                    token = jwt.decode(
+                        access_token,
+                        key=key,  # noqa
+                        algorithms=['RS256'],
+                        issuer=self.openid_config.issuer,
+                        options=options,
+                    )
+                    # Attach the user to the request. Can be accessed through `request.state.user`
+                    user: User = User(**token)
+                    request.state.user = user
+                    return user
+            except JWTClaimsError as error:
+                log.info('Token contains invalid claims. %s', error)
+                raise InvalidAuth(detail='Token contains invalid claims')
+            except ExpiredSignatureError as error:
+                log.info('Token signature has expired. %s', error)
+                raise InvalidAuth(detail='Token signature has expired')
+            except JWTError as error:
+                log.warning('Invalid token. Error: %s', error, exc_info=True)
+                raise InvalidAuth(detail='Unable to validate token')
+            except Exception as error:
+                # Extra failsafe in case of a bug in a future version of the jwt library
+                log.exception('Unable to process jwt token. Uncaught error: %s', error)
+                raise InvalidAuth(detail='Unable to process token')
+            log.warning('Unable to verify token. No signing keys found')
+            raise InvalidAuth(detail='Unable to verify token, no signing keys found')
+        except (HTTPException, InvalidAuth):
+            if not self.auto_error:
+                return None
+            raise
+
+
+cognito_scheme = CognitoAuthorizationCodeBearerBase()
+cognito_scheme_or_anonymous = CognitoAuthorizationCodeBearerBase(auto_error=False)
