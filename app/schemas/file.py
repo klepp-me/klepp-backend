@@ -18,7 +18,6 @@ class DeletedFileResponse(FileName):
 class FileResponse(FileName):
     uri: AnyUrl
     datetime: datetime.datetime
-    thumbnail_uri: AnyUrl | None = Field(None, alias='thumbnailUri')
     username: str
 
 
