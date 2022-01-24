@@ -39,7 +39,7 @@ works for GIF and videos too.
 I started using `pomf.cat`, until I automatically uploaded a screenshot of my desktop with personal information in it. 
 Since `pomf.cat` has no users, there was no way for me to delete this screenshot without mailing the owners of the site hoping they would listen (they did!). 
 At this point, I knew I could never use pomf.cat or untrusted service for this purpose again.  
-For videos, I used to `streamable.com`. The size limit is better, but 13 dollar per month (per user) for permanent
+For videos, I used `streamable.com`. The size limit is better, but 13 dollar per month (per user) for permanent
 storage of short clips seemed a bit steep. 
 
 My friends and I share these clips among us. Sometimes we sit on teamspeak, drink beer and watch back old clips. With the new frontend
