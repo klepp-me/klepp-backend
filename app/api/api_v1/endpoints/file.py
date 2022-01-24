@@ -77,6 +77,12 @@ async def upload_file(
     """
     Upload a file
     """
+    if not file:
+        raise HTTPException(status_code=400, detail='You must provide a file.')
+
+    if file.content_type != 'video/mp4':
+        raise HTTPException(status_code=400, detail='Currently only support for video/mp4 files through this API.')
+
     new_file_name = f'{user.username}/{file.filename}'
     exist = await session.list_objects_v2(Bucket=settings.S3_BUCKET_URL, Prefix=new_file_name)
     if exist.get('Contents'):
