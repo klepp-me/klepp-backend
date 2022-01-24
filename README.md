@@ -27,18 +27,27 @@ TL;DR:
 **API**: Upload, delete and manage your own files. List all files that are not in a hidden folder. Hide files you don't want to be listed from the list-API.  
 **Frontend**: View clips from all users, sorted on newest  
 
+The gif is below is an example on how to snippet a screenshot with ShareX, which automatically gets uploaded to the s3 bucket and returns a `gg.klepp.me` URL. The same workflow
+works for GIF and videos too.
+![Watch the video](example.gif)
+
+
 ## Why?
 
-I started using `pomf.cat`, until I unfortunately uploaded a screenshot of my desktop with personal information in it. (Using ShareX, so all screenshots are automatically uploaded)
-Since `pomf.cat` has no users, there was no way for me to delete this screenshot without mailing the owners of the site hoping they would listen (they did). 
+I started using `pomf.cat`, until I automatically uploaded a screenshot of my desktop with personal information in it. 
+Since `pomf.cat` has no users, there was no way for me to delete this screenshot without mailing the owners of the site hoping they would listen (they did!). 
 At this point, I knew I could never use pomf.cat or untrusted service for this purpose again.  
-Lately, I've swapped to `streamable.com` for video uploading of short gaming clips among friends. The size limit is better, but 13 dollar per month (per user) for 
-storage of short clips seemed a bit steep.
+For videos, I used to `streamable.com`. The size limit is better, but 13 dollar per month (per user) for permanent
+storage of short clips seemed a bit steep. 
 
-We also share these clips on TeamSpeak, and if you're not online, you won't see the clip. It feels impossible to find an older clip too, and 
-you don't really know for how long it will stay. This won't be a problem longer, any one of us can view any video uploaded through the frontend. :)
+My friends and I share these clips among us. Sometimes we sit on teamspeak, drink beer and watch back old clips. With the new frontend
+and history of all our uploads, we can do this without looking through browser history and re-uploading.
 
-TL;DR: Trust issues to external sites, 13 dollar per user at streamable was too much. We also wanted a unified dashboard where we could watch all the clips in our friend group.
+TL;DR: Trust issues to external sites, price, permanent storage, frontend with our clips only. 
 
 ## But klepp..?
 Yes, we tend to yell "CLIP!" or "KLEPP!" whenever someone does something we think should be clipped (ShadowPlay) and shared after a game :)
+
+## Cool!
+Keep in mind this all of this was done in a few days, without any thought of beautiful code or tests. 
+It is probably secure, but I wouldn't bet on it. 
