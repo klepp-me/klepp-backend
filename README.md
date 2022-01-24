@@ -8,6 +8,8 @@
 **Authentication** [auth.klepp.me](https://auth.klepp.me) -> TLS through AWS Certificate Manager -> AWS Cognito -> Validating tokens in backend  
 **Frontend**: [klepp.me -  Soon™](https://klepp.me) - x -> TLS -> React frontend -> Cognito auth -> Requests to the API
 
+Visualized something like this:  
+![visualized stack](klepp.png)
 
 ## What?
 [klepp.me](https://klepp.me) tries to be a [streamable.com](https://streamable.com/) / [pomf.cat](https://pomf.cat/) clone, 
@@ -29,7 +31,7 @@ TL;DR:
 
 The gif is below is an example on how to snippet a screenshot with ShareX, which automatically gets uploaded to the s3 bucket and returns a `gg.klepp.me` URL. The same workflow
 works for GIF and videos too.
-![Watch the video](example.gif)
+![example gif](example.gif)
 
 
 ## Why?
