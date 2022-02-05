@@ -34,12 +34,11 @@ async def hide_file(
     )
     await session.delete_object(Bucket=settings.S3_BUCKET_URL, Key=file.file_name)
 
-    return FileResponse(
-        file_name=new_path,
-        uri=f'https://gg.klepp.me/{new_path}',
-        datetime=datetime.now(timezone.utc).isoformat(' ', 'seconds'),
-        username=user.username,
-    )
+    return {
+        'file_name': new_path,
+        'datetime': datetime.now(timezone.utc).isoformat(' ', 'seconds'),
+        'username': user.username,
+    }
 
 
 @router.post('/show', response_model=FileResponse)
@@ -62,12 +61,11 @@ async def show_file(
     )
     await session.delete_object(Bucket=settings.S3_BUCKET_URL, Key=file.file_name)
 
-    return FileResponse(
-        file_name=new_path,
-        uri=f'https://gg.klepp.me/{new_path}',
-        username=user.username,
-        datetime=datetime.now(timezone.utc).isoformat(' ', 'seconds'),
-    )
+    return {
+        'file_name': new_path,
+        'username': user.username,
+        'datetime': datetime.now(timezone.utc).isoformat(' ', 'seconds'),
+    }
 
 
 @router.post('/files', response_model=FileResponse, status_code=status.HTTP_201_CREATED)
@@ -94,12 +92,11 @@ async def upload_file(
         ACL='public-read',
     )
 
-    return FileResponse(
-        file_name=new_file_name,
-        uri=f'https://gg.klepp.me/{new_file_name}',
-        username=user.username,
-        datetime=datetime.now(timezone.utc).isoformat(' ', 'seconds'),
-    )
+    return {
+        'file_name': new_file_name,
+        'username': user.username,
+        'datetime': datetime.now(timezone.utc).isoformat(' ', 'seconds'),
+    }
 
 
 @router.delete('/files', response_model=DeletedFileResponse)
@@ -134,7 +131,7 @@ async def get_all_files(
     if not user:
         user = User(username='AnonymousUser')
 
-    file_list_response: ListFilesResponse = ListFilesResponse(files=[], hidden_files=[])
+    file_list_response: dict[str, list[dict]] = {'files': [], 'hidden_files': []}
 
     for file in bucket['Contents']:
         path: str = file['Key']
@@ -148,13 +145,12 @@ async def get_all_files(
         if path_owner != user.username and split_path[1] == 'hidden':
             continue
 
-        uri = f'https://{settings.S3_BUCKET_URL}/{path}'
         if path_owner == user.username and split_path[1] == 'hidden':
-            file_list_response.hidden_files.append(
-                FileResponse(file_name=path, uri=uri, datetime=file['LastModified'], username=path_owner)
+            file_list_response['hidden_files'].append(
+                {'file_name': path, 'datetime': file['LastModified'], 'username': path_owner}
             )
-        file_list_response.files.append(
-            FileResponse(file_name=path, uri=uri, datetime=file['LastModified'], username=path_owner)
+        file_list_response['files'].append(
+            {'file_name': path, 'datetime': file['LastModified'], 'username': path_owner}
         )
 
     return file_list_response
