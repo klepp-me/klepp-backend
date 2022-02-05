@@ -1,7 +1,10 @@
 import datetime
 from typing import List
+from urllib.parse import quote
 
-from pydantic import AnyUrl, BaseModel, Field, validator
+from pydantic import BaseModel, Field, root_validator, validator
+
+from core.config import settings
 
 
 class FileName(BaseModel):
@@ -16,9 +19,17 @@ class DeletedFileResponse(FileName):
 
 
 class FileResponse(FileName):
-    uri: AnyUrl
+    uri: str
     datetime: datetime.datetime
     username: str
+
+    @root_validator(pre=True)
+    def extract_uri(cls, value: dict) -> dict:
+        """
+        Extract file_name and create an uri
+        """
+        value['uri'] = f'https://{settings.S3_BUCKET_URL}/{quote(value["file_name"])}'
+        return value
 
 
 class HideFile(FileName):
