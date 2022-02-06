@@ -1,8 +1,8 @@
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional
 
 from aiobotocore.client import AioBaseClient
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 
 from api.dependencies import get_boto
 from api.security import cognito_scheme, cognito_scheme_or_anonymous
@@ -70,7 +70,12 @@ async def show_file(
 
 @router.post('/files', response_model=FileResponse, status_code=status.HTTP_201_CREATED)
 async def upload_file(
-    session: AioBaseClient = Depends(get_boto), file: UploadFile = File(...), user: User = Depends(cognito_scheme)
+    file: UploadFile = File(..., description='File to upload'),
+    file_name: Optional[str] = Form(
+        default=None, alias='fileName', example='my_file.mp4', regex=r'^[\s\w\d_-]*$', min_length=2, max_length=40
+    ),
+    session: AioBaseClient = Depends(get_boto),
+    user: User = Depends(cognito_scheme),
 ) -> Any:
     """
     Upload a file
@@ -81,7 +86,9 @@ async def upload_file(
     if file.content_type != 'video/mp4':
         raise HTTPException(status_code=400, detail='Currently only support for video/mp4 files through this API.')
 
-    new_file_name = f'{user.username}/{file.filename}'
+    file_name = f'{file_name}.mp4' if file_name and not file_name.endswith('.mp4') else file_name
+
+    new_file_name = f'{user.username}/{file_name or file.filename}'
     exist = await session.list_objects_v2(Bucket=settings.S3_BUCKET_URL, Prefix=new_file_name)
     if exist.get('Contents'):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='File already exist.')
@@ -121,7 +128,7 @@ async def delete_file(
 @router.get('/files', response_model=ListFilesResponse)
 async def get_all_files(
     session: AioBaseClient = Depends(get_boto), user: User | None = Depends(cognito_scheme_or_anonymous)
-) -> ListFilesResponse:
+) -> dict[str, list[dict]]:
     """
     Get a list of all non-hidden files, unless you're the owner of the file.
     Works both as anonymous user and as a signed in user.
