@@ -1,5 +1,5 @@
 import datetime
-from typing import List
+from typing import List, Optional
 from urllib.parse import quote
 
 from pydantic import BaseModel, Field, root_validator, validator
@@ -38,8 +38,8 @@ class HideFile(FileName):
         """
         Validate file path is according to specification
         """
-        if '/hidden/' in value:
-            raise ValueError('Must not contain /hidden/')
+        if value.startswith('hidden/'):
+            raise ValueError('Must not start with `hidden/`')
         return value
 
 
@@ -49,8 +49,8 @@ class ShowFile(FileName):
         """
         Validate file path is according to specification
         """
-        if '/hidden/' not in value:
-            raise ValueError('Must not contain /hidden/')
+        if not value.startswith('hidden/'):
+            raise ValueError('File must start with `hidden/`')
         return value
 
 
@@ -60,7 +60,7 @@ class DeleteFile(FileName):
 
 class ListFilesResponse(BaseModel):
     files: List[FileResponse] = Field(default=[])
-    hidden_files: List[FileResponse] = Field(default=[], alias='hiddenFiles')
+    next_page: Optional[str] = Field(default=None, description='Next page key.', alias='nextPage')
 
     class Config:
         allow_population_by_field_name = True

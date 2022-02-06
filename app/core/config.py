@@ -7,6 +7,7 @@ class AWS(BaseSettings):
     # General
     AWS_REGION: str = Field('eu-north-1')
     S3_BUCKET_URL: str = Field('gg.klepp.me')
+    S3_BUCKET_HIDDEN_URL: str = Field('hidden.gg.klepp.me')  # still public, not a secret
 
     # Auth
     AWS_USER_POOL_ID: str = Field(..., env='AWS_USER_POOL_ID')
