@@ -17,8 +17,8 @@ from jose.backends.cryptography_backend import CryptographyRSAKey
 from jose.exceptions import JWTClaimsError, JWTError
 from starlette.requests import Request
 
-from core.config import settings
-from schemas.user import User
+from app.core.config import settings
+from app.schemas.user import User
 
 
 class InvalidAuth(HTTPException):

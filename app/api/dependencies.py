@@ -1,7 +1,7 @@
 from aiobotocore.client import AioBaseClient
 from aiobotocore.session import get_session
 
-from core.config import settings
+from app.core.config import settings
 
 session = get_session()
 

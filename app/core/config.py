@@ -24,6 +24,7 @@ class Settings(AWS):
     ENVIRONMENT: str = Field('dev', env='ENVIRONMENT')
     TESTING: bool = Field(False, env='TESTING')
     SECRET_KEY: str = Field(..., env='SECRET_KEY')
+    POSTGRES_CONNECTION_STRING: str = Field(..., env='POSTGRES_CONNECTION_STRING')
 
     # BACKEND_CORS_ORIGINS is a JSON-formatted list of origins
     # e.g: '["http://localhost", "http://localhost:4200", "http://localhost:3000", \
@@ -31,7 +32,7 @@ class Settings(AWS):
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = ['http://localhost:3000', 'http://localhost:5555']  # type: ignore
 
     class Config:  # noqa
-        env_file = '../.env'
+        env_file = '.env'
         env_file_encoding = 'utf-8'
         case_sensitive = True
 

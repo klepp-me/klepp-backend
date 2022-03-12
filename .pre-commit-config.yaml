@@ -1,4 +1,4 @@
-exclude: README.md
+exclude: README.md|migrations
 repos:
   - repo: https://github.com/ambv/black
     rev: '21.7b0'
@@ -49,4 +49,5 @@ repos:
             fastapi,
             pydantic,
             starlette,
+            sqlmodel
           ]
