@@ -3,6 +3,6 @@ from sqlmodel import create_engine
 
 from app.core.config import settings
 
-ASYNC_ENGINE = create_async_engine(settings.POSTGRES_CONNECTION_STRING, echo=False)  # echo can be True/False or 'debug'
+ASYNC_ENGINE = create_async_engine(settings.DATABASE_URL, echo=False)  # echo can be True/False or 'debug'
 
-SYNC_ENGINE = create_engine(settings.POSTGRES_CONNECTION_STRING.replace('+asyncpg', ''), echo='debug')
+SYNC_ENGINE = create_engine(settings.DATABASE_URL.replace('+asyncpg', ''), echo='debug')

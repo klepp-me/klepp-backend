@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import AnyHttpUrl, BaseSettings, Field
+from pydantic import AnyHttpUrl, BaseSettings, Field, validator
 
 
 class AWS(BaseSettings):
@@ -24,7 +24,14 @@ class Settings(AWS):
     ENVIRONMENT: str = Field('dev', env='ENVIRONMENT')
     TESTING: bool = Field(False, env='TESTING')
     SECRET_KEY: str = Field(..., env='SECRET_KEY')
-    POSTGRES_CONNECTION_STRING: str = Field(..., env='POSTGRES_CONNECTION_STRING')
+    DATABASE_URL: str = Field(..., env='DATABASE_URL')
+
+    @validator('DATABASE_URL', pre=True)
+    def name_must_contain_space(cls, value: str) -> str:
+        """
+        Replace Heroku postgres connection string to an async one, and change the prefix
+        """
+        return value.replace('postgres://', 'postgresql+asyncpg://')
 
     # BACKEND_CORS_ORIGINS is a JSON-formatted list of origins
     # e.g: '["http://localhost", "http://localhost:4200", "http://localhost:3000", \

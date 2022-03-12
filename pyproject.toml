@@ -23,6 +23,8 @@ typed-ast = "^1.5.2"
 alembic = "^1.7.6"
 sqlmodel = "^0.0.6"
 asgi-correlation-id = "^1.1.2"
+asyncpg = "^0.25.0"
+greenlet = "^1.1.2"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^2.9.3"
