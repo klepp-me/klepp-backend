@@ -20,7 +20,8 @@ fileConfig(config.config_file_name)
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from app.models.klepp import Video  # noqa
+from app.models.klepp import Video, Tag, VideoTagLink  # noqa
+from app.models.user import User  # noqa
 
 target_metadata = SQLModel.metadata
 

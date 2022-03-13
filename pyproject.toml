@@ -25,12 +25,14 @@ sqlmodel = "^0.0.6"
 asgi-correlation-id = "^1.1.2"
 asyncpg = "^0.25.0"
 greenlet = "^1.1.2"
+psycopg2 = "^2.9.3"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^2.9.3"
 black = "^20.8b1"
 isort = "^5.8.0"
 mypy = ">=0.812"
+ipython = "^8.1.1"
 
 [tool.black]
 line-length = 120

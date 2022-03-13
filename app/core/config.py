@@ -20,6 +20,7 @@ class AWS(BaseSettings):
 class Settings(AWS):
     PROJECT_NAME: str = 'klepp.me'
     API_V1_STR: str = '/api/v1'
+    API_V2_STR: str = '/api/v2'
 
     ENVIRONMENT: str = Field('dev', env='ENVIRONMENT')
     TESTING: bool = Field(False, env='TESTING')

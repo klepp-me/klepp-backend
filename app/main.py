@@ -2,11 +2,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.api_v1.api import api_router
+from app.api.api_v2.api import api_router as api_v2_router
 from app.core.config import settings
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    openapi_url=f'{settings.API_V1_STR}/openapi.json',
+    openapi_url=f'{settings.API_V2_STR}/openapi.json',
     swagger_ui_oauth2_redirect_url='/oauth2-redirect',
     swagger_ui_init_oauth={
         'usePkceWithAuthorizationCodeGrant': True,
@@ -25,3 +26,4 @@ if settings.BACKEND_CORS_ORIGINS:
     )
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
+app.include_router(api_v2_router, prefix=settings.API_V2_STR)
