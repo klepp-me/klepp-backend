@@ -1,8 +1,16 @@
 import uuid
 from datetime import datetime
-from typing import List, Optional
+from typing import Generic, List, Optional, TypeVar
 
+from pydantic.generics import GenericModel
 from sqlmodel import Field, Relationship, SQLModel
+
+ResponseModel = TypeVar('ResponseModel')
+
+
+class ListResponse(GenericModel, Generic[ResponseModel]):
+    total_count: int
+    response: list[ResponseModel]
 
 
 class UserBase(SQLModel):
@@ -44,17 +52,18 @@ class TagRead(TagBase):
 
 
 class VideoBase(SQLModel):
-    path: str = Field(primary_key=True, nullable=False)
-    display_name: str = Field(index=True)
-    hidden: bool = Field(default=False)
-    uploaded: datetime = Field(default=datetime.now())
-    uri: str = Field(...)
-    expire_at: Optional[datetime] = Field(default=None, nullable=True)
+    path: str = Field(primary_key=True, nullable=False, description='s3 path, primary key')
+    display_name: str = Field(index=True, description='Display name of the video')
+    hidden: bool = Field(default=False, description='Whether the file can be seen by anyone on the frontpage')
+    uploaded: datetime = Field(default=datetime.now(), description='When the file was uploaded')
+    uri: str = Field(..., description='Link to the video')
+    expire_at: Optional[datetime] = Field(default=None, nullable=True, description='When the file is to be deleted')
 
 
 class Video(VideoBase, table=True):
-    user_id: uuid.UUID = Field(foreign_key='user.id', nullable=False)
+    user_id: uuid.UUID = Field(foreign_key='user.id', nullable=False, description='User primary key')
     user: 'User' = Relationship(back_populates='videos')
+    thumbnail_uri: Optional[str] = Field(default=None, nullable=True)
 
     tags: List[Tag] = Relationship(back_populates='videos', link_model=VideoTagLink)
 
@@ -62,3 +71,4 @@ class Video(VideoBase, table=True):
 class VideoRead(VideoBase):
     user: 'UserRead'
     tags: List['TagRead']
+    thumbnail_uri: Optional[str] = Field(default=None, description='If it exist, we have a thumbnail for the video')

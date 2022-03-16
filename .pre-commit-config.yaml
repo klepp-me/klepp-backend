@@ -49,5 +49,6 @@ repos:
             fastapi,
             pydantic,
             starlette,
-            sqlmodel
+            sqlmodel,
+            types-aiofiles
           ]

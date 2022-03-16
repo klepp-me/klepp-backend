@@ -26,6 +26,10 @@ asgi-correlation-id = "^1.1.2"
 asyncpg = "^0.25.0"
 greenlet = "^1.1.2"
 psycopg2 = "^2.9.3"
+aiofiles = "^0.8.0"
+asyncffmpeg = "^1.2.0"
+asynccpu = "^1.2.2"
+ffmpeg-python = "^0.2.0"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^2.9.3"
