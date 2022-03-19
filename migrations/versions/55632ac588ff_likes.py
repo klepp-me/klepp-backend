@@ -1,8 +1,8 @@
-"""like
+"""likes
 
-Revision ID: 474aa428741b
+Revision ID: 55632ac588ff
 Revises: 1849bb6b7e57
-Create Date: 2022-03-19 12:35:14.871821
+Create Date: 2022-03-19 21:38:10.317951
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ import sqlmodel
 
 
 # revision identifiers, used by Alembic.
-revision = '474aa428741b'
+revision = '55632ac588ff'
 down_revision = '1849bb6b7e57'
 branch_labels = None
 depends_on = None
@@ -24,7 +24,8 @@ def upgrade():
     sa.Column('user_id', sqlmodel.sql.sqltypes.GUID(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.ForeignKeyConstraint(['video_path'], ['video.path'], ),
-    sa.PrimaryKeyConstraint('video_path', 'user_id')
+    sa.PrimaryKeyConstraint('video_path', 'user_id'),
+    sa.UniqueConstraint('user_id')
     )
     op.add_column('user', sa.Column('thumbnail_uri', sqlmodel.sql.sqltypes.AutoString(), nullable=True))
     # ### end Alembic commands ###
