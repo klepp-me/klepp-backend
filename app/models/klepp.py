@@ -13,8 +13,19 @@ class ListResponse(GenericModel, Generic[ResponseModel]):
     response: list[ResponseModel]
 
 
+class VideoTagLink(SQLModel, table=True):
+    tag_id: uuid.UUID = Field(default=None, foreign_key='tag.id', primary_key=True, nullable=False)
+    video_path: str = Field(default=None, foreign_key='video.path', primary_key=True, nullable=False)
+
+
+class VideoLikeLink(SQLModel, table=True):
+    video_path: str = Field(foreign_key='video.path', primary_key=True, nullable=False)
+    user_id: uuid.UUID = Field(foreign_key='user.id', primary_key=True, nullable=False)
+
+
 class UserBase(SQLModel):
     name: str = Field(index=True)
+    thumbnail_uri: Optional[str] = Field(default=None, nullable=True)
 
 
 class User(UserBase, table=True):
@@ -26,15 +37,11 @@ class User(UserBase, table=True):
 
     id: Optional[uuid.UUID] = Field(default_factory=uuid.uuid4, primary_key=True, index=True, nullable=False)
     videos: List['Video'] = Relationship(back_populates='user')
+    liked_videos: List['Video'] = Relationship(back_populates='likes', link_model=VideoLikeLink)
 
 
 class UserRead(UserBase):
     pass
-
-
-class VideoTagLink(SQLModel, table=True):
-    tag_id: uuid.UUID = Field(default=None, foreign_key='tag.id', primary_key=True, nullable=False)
-    video_path: str = Field(default=None, foreign_key='video.path', primary_key=True, nullable=False)
 
 
 class TagBase(SQLModel):
@@ -62,13 +69,15 @@ class VideoBase(SQLModel):
 
 class Video(VideoBase, table=True):
     user_id: uuid.UUID = Field(foreign_key='user.id', nullable=False, description='User primary key')
-    user: 'User' = Relationship(back_populates='videos')
+    user: User = Relationship(back_populates='videos')
     thumbnail_uri: Optional[str] = Field(default=None, nullable=True)
 
     tags: List[Tag] = Relationship(back_populates='videos', link_model=VideoTagLink)
+    likes: List[User] = Relationship(back_populates='liked_videos', link_model=VideoLikeLink)
 
 
 class VideoRead(VideoBase):
     user: 'UserRead'
     tags: List['TagRead']
     thumbnail_uri: Optional[str] = Field(default=None, description='If it exist, we have a thumbnail for the video')
+    likes: List['UserRead']

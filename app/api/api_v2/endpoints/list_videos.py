@@ -32,7 +32,11 @@ async def get_all_files(
     """
     # Video query
     video_statement = (
-        select(Video).options(selectinload(Video.user)).options(selectinload(Video.tags)).order_by(asc(Video.uploaded))
+        select(Video)
+        .options(selectinload(Video.user))
+        .options(selectinload(Video.tags))
+        .options(selectinload(Video.likes))
+        .order_by(asc(Video.uploaded))
     )
     if username and username.islower() and username.isalnum():
         video_statement = video_statement.where(Video.user.has(name=username))  # type: ignore
@@ -53,13 +57,11 @@ async def get_all_files(
 
     # Add pagination
     video_statement = video_statement.offset(offset=offset).limit(limit=limit)
-
     # Do DB requests async
     tasks = [
         asyncio.create_task(session.exec(video_statement)),  # type: ignore
         asyncio.create_task(session.exec(count_statement)),
     ]
     results, count = await asyncio.gather(*tasks)
-
     count_number = count.first()
     return {'total_count': count_number, 'response': results.all()}
