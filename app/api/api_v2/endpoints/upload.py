@@ -36,32 +36,39 @@ async def upload_file(
         raise HTTPException(status_code=400, detail='Currently only support for video/mp4 files through this API.')
 
     file_name = f'{file_name}.mp4' if file_name and not file_name.endswith('.mp4') else file_name
-
     new_file_name = f'{user.username}/{file_name or file.filename}'
 
     exist = await session.list_objects_v2(Bucket=settings.S3_BUCKET_URL, Prefix=new_file_name)
     if exist.get('Contents'):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='File already exist in s3.')
+
+    # Save video
+    temp_name = uuid4().hex
+    async with aiofiles.open(f'{temp_name}.mp4', 'wb') as video:
+        while content := await file.read(1024):
+            await video.write(content)  # type: ignore
+
     # Video
     await session.put_object(
         Bucket=settings.S3_BUCKET_URL,
         Key=new_file_name,
-        Body=await file.read(),
+        Body=f'{temp_name}.mp4',
         ACL='public-read',
     )
 
+    await await_ffmpeg(url=f'{temp_name}.mp4', name=f'{temp_name}.png')
     # Thumbnail
-    thumbnail_name = f'{uuid4().hex}.png'
-    await await_ffmpeg(url=f'https://gg.klepp.me/{new_file_name}', name=thumbnail_name)
-
-    async with aiofiles.open(thumbnail_name, 'rb+') as thumbnail_img:
+    async with aiofiles.open(f'{temp_name}.png', 'rb+') as thumbnail_img:
         await session.put_object(
             Bucket=settings.S3_BUCKET_URL,
             Key=new_file_name.replace('.mp4', '.png'),
             Body=await thumbnail_img.read(),
             ACL='public-read',
         )
-    await os.remove(thumbnail_name)
+
+    # Cleanup
+    await os.remove(f'{temp_name}.png')
+    await os.remove(f'{temp_name}.mp4')
 
     return {
         'file_name': new_file_name,
