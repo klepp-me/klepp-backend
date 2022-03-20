@@ -8,17 +8,21 @@ import logging
 from datetime import datetime, timedelta
 from typing import Any
 
-from fastapi import HTTPException, status
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2AuthorizationCodeBearer, SecurityScopes
 from fastapi.security.base import SecurityBase
 from httpx import AsyncClient
 from jose import ExpiredSignatureError, jwk, jwt
 from jose.backends.cryptography_backend import CryptographyRSAKey
 from jose.exceptions import JWTClaimsError, JWTError
+from sqlmodel import select
+from sqlmodel.ext.asyncio.session import AsyncSession
 from starlette.requests import Request
 
+from app.api.dependencies import yield_db_session
 from app.core.config import settings
-from app.schemas.user import User
+from app.models.klepp import User
+from app.schemas.user import User as CognitoUser
 
 
 class InvalidAuth(HTTPException):
@@ -116,7 +120,7 @@ class CognitoAuthorizationCodeBearerBase(SecurityBase):
         self.model = self.oauth.model
         self.scheme_name: str = 'Cognito'
 
-    async def __call__(self, request: Request, security_scopes: SecurityScopes) -> User | None:
+    async def __call__(self, request: Request, security_scopes: SecurityScopes) -> CognitoUser | None:
         """
         Extends call to also validate the token.
         """
@@ -175,7 +179,7 @@ class CognitoAuthorizationCodeBearerBase(SecurityBase):
                         options=options,
                     )
                     # Attach the user to the request. Can be accessed through `request.state.user`
-                    user: User = User(**token)
+                    user: CognitoUser = CognitoUser(**token)
                     request.state.user = user
                     return user
             except JWTClaimsError as error:
@@ -201,3 +205,22 @@ class CognitoAuthorizationCodeBearerBase(SecurityBase):
 
 cognito_scheme = CognitoAuthorizationCodeBearerBase()
 cognito_scheme_or_anonymous = CognitoAuthorizationCodeBearerBase(auto_error=False)
+
+
+async def cognito_signed_in(
+    cognito_user: CognitoUser = Depends(cognito_scheme),
+    db_session: AsyncSession = Depends(yield_db_session),
+) -> User:
+    """
+    Creates a user in the DB for a signed in Cognito user if it don't exist
+    """
+    select_user = select(User).where(User.name == cognito_user.username)
+    user_query = await db_session.exec(select_user)  # type: ignore
+    user = user_query.first()
+    if not user:
+        new_user = User(name=cognito_user.username)
+        db_session.add(new_user)
+        await db_session.commit()
+        await db_session.refresh(new_user)
+        return new_user
+    return user  # type: ignore

@@ -3,7 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.api_v1.api import api_router
 from app.api.api_v2.api import api_router as api_v2_router
+from app.api.security import cognito_scheme
 from app.core.config import settings
+from app.core.logging_config import setup_logging
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -13,6 +15,7 @@ app = FastAPI(
         'usePkceWithAuthorizationCodeGrant': True,
         'clientId': settings.AWS_OPENAPI_CLIENT_ID,
     },
+    on_startup=[setup_logging, cognito_scheme.openid_config.load_config],
 )
 
 # Set all CORS enabled origins
