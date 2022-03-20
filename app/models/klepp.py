@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Generic, List, Optional, TypeVar
 
 from pydantic.generics import GenericModel
@@ -64,7 +64,9 @@ class VideoBase(SQLModel):
     hidden: bool = Field(default=False, description='Whether the file can be seen by anyone on the frontpage')
     uploaded: datetime = Field(default=datetime.now(), description='When the file was uploaded')
     uri: str = Field(..., description='Link to the video')
-    expire_at: Optional[datetime] = Field(default=None, nullable=True, description='When the file is to be deleted')
+    expire_at: Optional[datetime] = Field(
+        datetime.now() + timedelta(weeks=12), nullable=True, description='When the file is to be deleted'
+    )
 
 
 class Video(VideoBase, table=True):
