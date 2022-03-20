@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import AnyHttpUrl, BaseSettings, Field
+from pydantic import AnyHttpUrl, BaseSettings, Field, validator
 
 
 class AWS(BaseSettings):
@@ -20,10 +20,19 @@ class AWS(BaseSettings):
 class Settings(AWS):
     PROJECT_NAME: str = 'klepp.me'
     API_V1_STR: str = '/api/v1'
+    API_V2_STR: str = '/api/v2'
 
     ENVIRONMENT: str = Field('dev', env='ENVIRONMENT')
     TESTING: bool = Field(False, env='TESTING')
     SECRET_KEY: str = Field(..., env='SECRET_KEY')
+    DATABASE_URL: str = Field(..., env='DATABASE_URL')
+
+    @validator('DATABASE_URL', pre=True)
+    def name_must_contain_space(cls, value: str) -> str:
+        """
+        Replace Heroku postgres connection string to an async one, and change the prefix
+        """
+        return value.replace('postgres://', 'postgresql+asyncpg://')
 
     # BACKEND_CORS_ORIGINS is a JSON-formatted list of origins
     # e.g: '["http://localhost", "http://localhost:4200", "http://localhost:3000", \
@@ -31,7 +40,7 @@ class Settings(AWS):
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = ['http://localhost:3000', 'http://localhost:5555']  # type: ignore
 
     class Config:  # noqa
-        env_file = '../.env'
+        env_file = '.env'
         env_file_encoding = 'utf-8'
         case_sensitive = True
 

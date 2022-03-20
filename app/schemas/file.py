@@ -4,7 +4,7 @@ from urllib.parse import quote
 
 from pydantic import BaseModel, Field, root_validator, validator
 
-from core.config import settings
+from app.core.config import settings
 
 
 class FileName(BaseModel):

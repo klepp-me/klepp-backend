@@ -4,11 +4,11 @@ from typing import Any, Optional
 from aiobotocore.client import AioBaseClient
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 
-from api.dependencies import get_boto
-from api.security import cognito_scheme, cognito_scheme_or_anonymous
-from core.config import settings
-from schemas.file import DeletedFileResponse, DeleteFile, FileResponse, HideFile, ListFilesResponse, ShowFile
-from schemas.user import User
+from app.api.dependencies import get_boto
+from app.api.security import cognito_scheme, cognito_scheme_or_anonymous
+from app.core.config import settings
+from app.schemas.file import DeletedFileResponse, DeleteFile, FileResponse, HideFile, ListFilesResponse, ShowFile
+from app.schemas.user import User
 
 router = APIRouter()
 
