@@ -216,7 +216,7 @@ async def cognito_signed_in(
     """
     select_user = select(User).where(User.name == cognito_user.username)
     user_query = await db_session.exec(select_user)  # type: ignore
-    user = user_query.first()
+    user = user_query.one_or_none()
     if not user:
         new_user = User(name=cognito_user.username)
         db_session.add(new_user)

@@ -36,5 +36,5 @@ async def get_all_tags(
         asyncio.create_task(session.exec(count_statement)),
     ]
     results, count = await asyncio.gather(*tasks)
-    count_number = count.first()
+    count_number = count.one_or_none()
     return {'total_count': count_number, 'response': results.all()}

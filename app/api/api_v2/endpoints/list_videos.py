@@ -21,7 +21,7 @@ async def get_all_files(
     user: CognitoUser | None = Depends(cognito_scheme_or_anonymous),
     username: Optional[str] = None,
     hidden: bool = False,
-    tag: Optional[str] = None,
+    tags: Optional[str] = Query(default=None, description='Comma seperated list of tag names'),
     offset: int = 0,
     limit: int = Query(default=100, lte=100),
 ) -> dict[str, int | list]:
@@ -46,8 +46,9 @@ async def get_all_files(
         )
     else:
         video_statement = video_statement.where(Video.hidden == False)  # noqa
-    if tag:
-        video_statement = video_statement.where(Video.tags.any(name=tag))  # type: ignore
+    if tags:
+        for tag in tags.split(','):
+            video_statement = video_statement.where(Video.tags.any(name=tag))  # type: ignore
 
     # Total count query based on query params, without pagination
     count_statement = select(func.count('*')).select_from(video_statement)  # type: ignore
@@ -60,5 +61,5 @@ async def get_all_files(
         asyncio.create_task(session.exec(count_statement)),
     ]
     results, count = await asyncio.gather(*tasks)
-    count_number = count.first()
+    count_number = count.one_or_none()
     return {'total_count': count_number, 'response': results.all()}

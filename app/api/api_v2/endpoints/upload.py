@@ -109,4 +109,4 @@ async def upload_file(
         .options(selectinload(Video.likes))
     )
     result = await db_session.exec(query_video)  # type: ignore
-    return result.first()
+    return result.one_or_none()

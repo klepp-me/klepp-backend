@@ -29,7 +29,7 @@ async def delete_file(
     """
     video_statement = select(Video).where(and_(Video.path == path.path, Video.user_id == user.id))
     db_result = await db_session.exec(video_statement)  # type: ignore
-    video = db_result.first()
+    video = db_result.one_or_none()
     if not video:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

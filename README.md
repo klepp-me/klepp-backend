@@ -6,7 +6,7 @@
 **Storage**: [gg.klepp.me](https://gg.klepp.me) -> TLS through AWS Certificate Manager -> AWS Cloudfront CDN -> AWS S3 bucket    
 **API**: [api.klepp.me](https://api.klepp.me/docs) -> TLS through Heroku -> Hosted on Heroku -> FastAPI -> [validate tokens](app/api/security.py) -> [S3 bucket](app/api/api_v1/endpoints/file.py)    
 **Authentication** [auth.klepp.me](https://auth.klepp.me) -> TLS through AWS Certificate Manager -> AWS Cognito -> Validating tokens in backend  
-**Frontend**: [klepp.me -  Soon™](https://klepp.me) - x -> TLS -> React frontend -> Cognito auth -> Requests to the API
+**Frontend**: [klepp.me](https://klepp.me) -> GitHub pages -> TLS -> React frontend -> Cognito auth -> Requests to the API
 
 Visualized something like this:  
 ![visualized stack](klepp.png)

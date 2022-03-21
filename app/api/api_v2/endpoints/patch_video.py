@@ -37,7 +37,7 @@ async def patch_video(
         .options(selectinload(Video.tags))
     )
     db_result = await db_session.exec(query_video)  # type: ignore
-    video = db_result.first()
+    video = db_result.one_or_none()
     if not video:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -74,4 +74,4 @@ async def patch_video(
         .options(selectinload(Video.likes))
     )
     result = await db_session.exec(query_video)  # type: ignore
-    return result.first()
+    return result.one_or_none()
