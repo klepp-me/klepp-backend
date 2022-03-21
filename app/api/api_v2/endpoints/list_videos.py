@@ -36,7 +36,7 @@ async def get_all_files(
         .options(selectinload(Video.user))
         .options(selectinload(Video.tags))
         .options(selectinload(Video.likes))
-        .order_by(asc(Video.uploaded))
+        .order_by(asc(Video.uploaded_at))
     )
     if username:
         video_statement = video_statement.where(Video.user.has(name=username))  # type: ignore
