@@ -7,6 +7,7 @@ from sqlalchemy.orm import selectinload
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from api.services import fetch_one_or_none_video
 from app.api.dependencies import yield_db_session
 from app.api.security import cognito_signed_in
 from app.models.klepp import Tag, TagBase, User, Video, VideoRead
@@ -65,13 +66,5 @@ async def patch_video(
 
     db_session.add(video)
     await db_session.commit()
-    # To keep responses equal between list and post APIs, we fetch it all
-    query_video = (
-        select(Video)
-        .where(Video.path == video_patch.path)
-        .options(selectinload(Video.user))
-        .options(selectinload(Video.tags))
-        .options(selectinload(Video.likes))
-    )
-    result = await db_session.exec(query_video)  # type: ignore
-    return result.one_or_none()
+
+    return await fetch_one_or_none_video(video_path=video_patch.path, db_session=db_session)
