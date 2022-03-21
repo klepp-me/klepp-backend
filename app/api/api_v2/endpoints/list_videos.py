@@ -10,7 +10,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from app.api.dependencies import yield_db_session
 from app.api.security import cognito_scheme_or_anonymous
 from app.models.klepp import ListResponse, Video, VideoRead
-from app.schemas.user import User as CognitoUser
+from app.schemas.schemas_v1.user import User as CognitoUser
 
 router = APIRouter()
 

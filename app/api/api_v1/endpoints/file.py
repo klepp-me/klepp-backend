@@ -7,8 +7,15 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 from app.api.dependencies import get_boto
 from app.api.security import cognito_scheme, cognito_scheme_or_anonymous
 from app.core.config import settings
-from app.schemas.file import DeletedFileResponse, DeleteFile, FileResponse, HideFile, ListFilesResponse, ShowFile
-from app.schemas.user import User
+from app.schemas.schemas_v1.file import (
+    DeletedFileResponse,
+    DeleteFile,
+    FileResponse,
+    HideFile,
+    ListFilesResponse,
+    ShowFile,
+)
+from app.schemas.schemas_v1.user import User
 
 router = APIRouter()
 

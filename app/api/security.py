@@ -22,7 +22,7 @@ from starlette.requests import Request
 from app.api.dependencies import yield_db_session
 from app.core.config import settings
 from app.models.klepp import User
-from app.schemas.user import User as CognitoUser
+from app.schemas.schemas_v1.user import User as CognitoUser
 
 
 class InvalidAuth(HTTPException):
