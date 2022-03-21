@@ -2,7 +2,7 @@ import asyncio
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import and_, asc, func, or_
+from sqlalchemy import and_, asc, func
 from sqlalchemy.orm import selectinload
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -42,10 +42,7 @@ async def get_all_files(
         video_statement = video_statement.where(Video.user.has(name=username))  # type: ignore
     if user and hidden:
         video_statement = video_statement.where(
-            or_(
-                Video.hidden == False,  # noqa
-                and_(Video.hidden == True, Video.user.has(name=user.username)),  # type:ignore
-            )
+            and_(Video.hidden == True, Video.user.has(name=user.username)),  # type:ignore  # noqa
         )
     else:
         video_statement = video_statement.where(Video.hidden == False)  # noqa
