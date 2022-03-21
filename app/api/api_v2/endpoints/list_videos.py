@@ -2,7 +2,7 @@ import asyncio
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import and_, asc, func
+from sqlalchemy import and_, desc, func
 from sqlalchemy.orm import selectinload
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -36,7 +36,7 @@ async def get_all_files(
         .options(selectinload(Video.user))
         .options(selectinload(Video.tags))
         .options(selectinload(Video.likes))
-        .order_by(asc(Video.uploaded_at))
+        .order_by(desc(Video.uploaded_at))
     )
     if username:
         video_statement = video_statement.where(Video.user.has(name=username))  # type: ignore
