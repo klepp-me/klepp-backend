@@ -22,13 +22,13 @@ class VideoPatch(BaseModel):
 
 
 @router.patch('/files', response_model=VideoRead)
-async def get_all_files(
+async def patch_video(
     video_patch: VideoPatch,
     db_session: AsyncSession = Depends(yield_db_session),
     user: User = Depends(cognito_signed_in),
 ) -> Any:
     """
-    Patch
+    Partially update a video.
     """
     excluded = video_patch.dict(exclude_unset=True)
     query_video = (
