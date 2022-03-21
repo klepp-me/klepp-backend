@@ -25,7 +25,7 @@ class Settings(AWS):
     ENVIRONMENT: str = Field('dev', env='ENVIRONMENT')
     TESTING: bool = Field(False, env='TESTING')
     SECRET_KEY: str = Field(..., env='SECRET_KEY')
-    DATABASE_URL: str = Field(..., env='DATABASE_URL')
+    DATABASE_URL: str = Field(..., env='AZURE_DATABASE_URL')
 
     @validator('DATABASE_URL', pre=True)
     def name_must_contain_space(cls, value: str) -> str:
