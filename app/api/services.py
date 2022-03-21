@@ -1,6 +1,4 @@
-import asyncio
-import functools
-from typing import Optional
+from typing import Callable, Optional
 
 import ffmpeg
 from asynccpu import ProcessTaskPoolExecutor
@@ -12,25 +10,28 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from app.models.klepp import Video, VideoRead
 
 
-async def generate_thumbnail(url: str, name: str) -> StreamSpec:
+async def generate_user_thumbnail(path: str, name: str) -> StreamSpec:
     """
-    Downloads from URL, cuts first frame and generates a new file
+    Cuts first frame and generates a new file
     """
-    return ffmpeg.input(url).filter('scale', 420, -1).output(name, vframes=1)
+    return ffmpeg.input(path).filter('scale', 420, 420, force_original_aspect_ratio='decrease').output(name)
 
 
-async def await_ffmpeg(url: str, name: str) -> None:
+async def generate_video_thumbnail(path: str, name: str) -> StreamSpec:
+    """
+    Cuts first frame and generates a new file
+    """
+    return ffmpeg.input(path).filter('scale', 420, -1).output(name, vframes=1)
+
+
+async def await_ffmpeg(function: Callable) -> None:
     """
     Make ffmpeg awaitable
     """
     ffmpeg_coroutine = FFmpegCoroutineFactory.create()
 
     with ProcessTaskPoolExecutor(max_workers=3, cancel_tasks_when_shutdown=True) as executor:
-        awaitables = (
-            executor.create_process_task(ffmpeg_coroutine.execute, create_stream_spec)
-            for create_stream_spec in [functools.partial(generate_thumbnail, url, name)]
-        )
-        await asyncio.gather(*awaitables)
+        await executor.create_process_task(ffmpeg_coroutine.execute, function)
 
 
 async def fetch_one_or_none_video(video_path: str, db_session: AsyncSession) -> Optional[VideoRead]:

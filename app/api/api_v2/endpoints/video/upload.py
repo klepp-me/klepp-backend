@@ -1,4 +1,5 @@
 import asyncio
+import functools
 from typing import Any, Optional
 from uuid import uuid4
 
@@ -8,7 +9,7 @@ from aiofiles import os
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from api.services import fetch_one_or_none_video
+from api.services import fetch_one_or_none_video, generate_video_thumbnail
 from app.api.dependencies import get_boto, yield_db_session
 from app.api.security import cognito_signed_in
 from app.api.services import await_ffmpeg
@@ -71,7 +72,13 @@ async def upload_file(
     upload_task = asyncio.create_task(
         upload_video(boto_session=boto_session, path=s3_path, temp_video_name=temp_vido_name)
     )
-    ffmpeg_task = asyncio.create_task(await_ffmpeg(url=temp_vido_name, name=temp_thumbnail_name))
+    ffmpeg_task = asyncio.create_task(
+        # create task calling await_ffmpeg
+        await_ffmpeg(
+            # passing the `generate_video_thumbnail` function with the arguments temp_vido_name, temp_thumbnail_name
+            functools.partial(generate_video_thumbnail, temp_vido_name, temp_thumbnail_name)
+        )
+    )
     await asyncio.gather(upload_task, ffmpeg_task)
 
     # Upload thumbnail and clean up

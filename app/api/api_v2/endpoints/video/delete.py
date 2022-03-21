@@ -38,7 +38,7 @@ async def delete_file(
     await boto_session.delete_object(Bucket=settings.S3_BUCKET_URL, Key=video.path)
     if video.thumbnail_uri:
         await boto_session.delete_object(
-            Bucket=settings.S3_BUCKET_URL, key=video.thumbnail_uri.split('https://gg.klepp.me/')[0]
+            Bucket=settings.S3_BUCKET_URL, Key=video.thumbnail_uri.split('https://gg.klepp.me/')[1]
         )
     await db_session.delete(video)
     await db_session.commit()
