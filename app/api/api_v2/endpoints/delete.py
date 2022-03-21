@@ -36,6 +36,7 @@ async def delete_file(
             detail='File not found. Ensure you own the file, and that the file already exist.',
         )
     await boto_session.delete_object(Bucket=settings.S3_BUCKET_URL, Key=path)
+    await boto_session.delete_object(Bucket=settings.S3_BUCKET_URL, key=video.thumbnail_uri)
     await db_session.delete(video)
     await db_session.commit()
     return {'path': path}
