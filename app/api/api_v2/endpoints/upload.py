@@ -91,7 +91,12 @@ async def upload_file(
 
     # Add to DB and fetch it
     db_video: Video = Video(
-        path=s3_path, display_name=file_name, user=user, user_id=user.id, uri=video_uri, thumbnail_uri=thumbnail_uri
+        path=s3_path,
+        display_name=upload_file_name,
+        user=user,
+        user_id=user.id,
+        uri=video_uri,
+        thumbnail_uri=thumbnail_uri,
     )
     db_session.add(db_video)
     await db_session.commit()
