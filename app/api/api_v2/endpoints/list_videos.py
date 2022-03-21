@@ -38,7 +38,7 @@ async def get_all_files(
         .options(selectinload(Video.likes))
         .order_by(asc(Video.uploaded))
     )
-    if username and username.islower() and username.isalnum():
+    if username:
         video_statement = video_statement.where(Video.user.has(name=username))  # type: ignore
     if user and hidden:
         video_statement = video_statement.where(
