@@ -62,7 +62,7 @@ class VideoBase(SQLModel):
     path: str = Field(primary_key=True, nullable=False, description='s3 path, primary key')
     display_name: str = Field(index=True, description='Display name of the video')
     hidden: bool = Field(default=False, description='Whether the file can be seen by anyone on the frontpage')
-    uploaded: datetime = Field(default=datetime.now(), description='When the file was uploaded')
+    uploaded_at: datetime = Field(default=datetime.now(), description='When the file was uploaded')
     uri: str = Field(..., description='Link to the video')
     expire_at: Optional[datetime] = Field(
         datetime.now() + timedelta(weeks=12), nullable=True, description='When the file is to be deleted'
