@@ -19,7 +19,7 @@ class DeletedFileResponse(BaseModel):
 
 @router.delete('/files', response_model=DeletedFileResponse)
 async def delete_file(
-    path: str,
+    path: DeletedFileResponse,
     boto_session: AioBaseClient = Depends(get_boto),
     user: User = Depends(cognito_signed_in),
     db_session: AsyncSession = Depends(yield_db_session),
@@ -27,7 +27,7 @@ async def delete_file(
     """
     Delete file with filename
     """
-    video_statement = select(Video).where(and_(Video.path == path, Video.user_id == user.id))
+    video_statement = select(Video).where(and_(Video.path == path.path, Video.user_id == user.id))
     db_result = await db_session.exec(video_statement)  # type: ignore
     video = db_result.first()
     if not video:
@@ -35,8 +35,11 @@ async def delete_file(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='File not found. Ensure you own the file, and that the file already exist.',
         )
-    await boto_session.delete_object(Bucket=settings.S3_BUCKET_URL, Key=path)
-    await boto_session.delete_object(Bucket=settings.S3_BUCKET_URL, key=video.thumbnail_uri)
+    await boto_session.delete_object(Bucket=settings.S3_BUCKET_URL, Key=video.path)
+    if video.thumbnail_uri:
+        await boto_session.delete_object(
+            Bucket=settings.S3_BUCKET_URL, key=video.thumbnail_uri.split('https://gg.klepp.me/')[0]
+        )
     await db_session.delete(video)
     await db_session.commit()
-    return {'path': path}
+    return {'path': path.path}
