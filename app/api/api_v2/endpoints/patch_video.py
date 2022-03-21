@@ -51,7 +51,7 @@ async def patch_video(
         tags: list[Tag] = tag_result.all()
         if len(list_tag) != len(tags):
             db_list_tag = [tag.name for tag in tags]
-            not_found_tags = [tag for tag in list_tag if tag not in db_list_tag]
+            not_found_tags = [f'`{tag}`' for tag in list_tag if tag not in db_list_tag]
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f'Tag {", ".join(not_found_tags)} not found.',
