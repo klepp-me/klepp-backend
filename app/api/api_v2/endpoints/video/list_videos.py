@@ -21,7 +21,7 @@ async def get_all_files(
     user: CognitoUser | None = Depends(cognito_scheme_or_anonymous),
     username: Optional[str] = None,
     hidden: bool = False,
-    tags: Optional[str] = Query(default=None, description='Comma seperated list of tag names'),
+    tags: list[str] = Query(default=[], description='Comma seperated list of tag names'),
     offset: int = 0,
     limit: int = Query(default=100, lte=100),
 ) -> dict[str, int | list]:
@@ -46,9 +46,9 @@ async def get_all_files(
         )
     else:
         video_statement = video_statement.where(Video.hidden == False)  # noqa
-    if tags:
-        for tag in tags.split(','):
-            video_statement = video_statement.where(Video.tags.any(name=tag))  # type: ignore
+
+    for tag in tags:
+        video_statement = video_statement.where(Video.tags.any(name=tag))  # type: ignore
 
     # Total count query based on query params, without pagination
     count_statement = select(func.count('*')).select_from(video_statement)  # type: ignore
