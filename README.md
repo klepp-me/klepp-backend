@@ -1,55 +1,110 @@
 # klepp.me
 *A service to share clips among friends, while owning and managing our own data*  
 
-### Stack
+**NB:** v2 rewrite in progress.
 
-**Storage**: [gg.klepp.me](https://gg.klepp.me) -> TLS through AWS Certificate Manager -> AWS Cloudfront CDN -> AWS S3 bucket    
-**API**: [api.klepp.me](https://api.klepp.me/docs) -> TLS through Heroku -> Hosted on Heroku -> FastAPI -> [validate tokens](app/api/security.py) -> [S3 bucket](app/api/api_v1/endpoints/file.py)    
-**Authentication** [auth.klepp.me](https://auth.klepp.me) -> TLS through AWS Certificate Manager -> AWS Cognito -> Validating tokens in backend  
-**Frontend**: [klepp.me](https://klepp.me) -> GitHub pages -> TLS -> React frontend -> Cognito auth -> Requests to the API
+### What?
 
-Visualized something like this:  
-![visualized stack](klepp.png)
-
-## What?
-[klepp.me](https://klepp.me) tries to be a [streamable.com](https://streamable.com/) / [pomf.cat](https://pomf.cat/) clone, 
-which integrates natively with [`ShareX`](https://getsharex.com/). 
+[klepp.me](https://klepp.me) version 1 started off to be a [streamable.com](https://streamable.com/) / [pomf.cat](https://pomf.cat/) clone, 
+which integrated natively with [`ShareX`](https://getsharex.com/). 
 Any screenshot or video recorded through this program is automatically be uploaded to `gg.klepp.me`. When the file has been
 uploaded, a URL with a link to the resource is automatically stored in your clipboard.  
-This file can be shared with friends and viewed directly in your browser. There is no size limit on any file.
 
-The API allows the user to list all video files from all users. If a user don't want a video to be listed, the user can hide their own video from this list.
-The user can at any point unhide/show the video again to allow others to discover it. All users can upload and delete their own files, even those
-uploaded through ShareX. 
+The v1 APIs of `klepp` only used S3 APIs to list and manage files. Due to object storage having very limited
+functionality, we outgrew its functionality within hours. The need for a better list-API with pagination and 
+extensible sorting on users, tags, likes etc. was immediate. The frontend also had performance issues
+due to loading too many videos, so automatic generation and storage of video thumbnails became a necessity.
 
-The frontend allow you to list and view the latest clips, as well as managing your own files as described above.
+<details>
+  <summary>V1 and V2 feature comparison table</summary>
 
-TL;DR:   
-**ShareX support**: Upload clips, files and images directly to the s3 bucket. Share `gg.klepp.me`-links directly.  
-**API**: Upload, delete and manage your own files. List all files that are not in a hidden folder. Hide files you don't want to be listed from the list-API.  
-**Frontend**: View clips from all users, sorted on newest  
+|                      | **v1** | **v2**  |
+|----------------------|--------|---------|
+| Cognito login        | ✅      | ✅️      |
+| List Videos          | ✅      | ✅️      |
+| Sorting              | ❌      | ✅️      |
+| Pagination           | ❌      | ✅️      |
+| ShareX support       | ✅      | ✅️*     |
+| Upload Videos        | ✅      | ✅️      |
+| Delete Videos        | ✅      | ✅️      |
+| Hide videos          | ✅      | ✅️      |
+| Like videos          | ❌      | ✅️      |
+| Tags                 | ❌      | ✅️      |
+| Thumbnail generation | ❌      | ✅️      |
 
-The gif is below is an example on how to snippet a screenshot with ShareX, which automatically gets uploaded to the s3 bucket and returns a `gg.klepp.me` URL. The same workflow
-works for GIF and videos too.
-![example gif](example.gif)
+
+*\* ShareX support still there, but these videos will not show up in the list API, since a DB is used instead
+of reflecting the S3 bucket. We might add a lambda to create the entry uploaded from ShareX in the database,
+but this a low priority now that we have a GUI.*
+</details>
+
+
+### Stack
+
+* **Storage**: [gg.klepp.me](https://gg.klepp.me) -> AWS Cloudfront CDN -> AWS S3 bucket    
+* **API**: [api.klepp.me](https://api.klepp.me/docs) -> Hosted on Heroku -> FastAPI -> [validate tokens/Cognito auth](app/api/security.py) -> API View  
+  * **Database**: PostgreSQL using SQLModel/SQLAlchemy 
+* **Authentication** [auth.klepp.me](https://auth.klepp.me) -> AWS Cognito
+* **Frontend**: [klepp.me](https://klepp.me) -> GitHub pages -> React frontend -> Cognito auth -> Requests to the API
+
+TLS is achieved on all sites using either AWS Certificate Manager, Heroku or GitHub pages. 
+
+Visualized something like this:  
+![visualized v2 stack](klepp_v2.png)
+
+<details>
+  <summary>You can see the v1 visualization here</summary>
+
+  ![visualized v1 stack](klepp.png)
+</details>
+
+<details>
+  <summary>ShareX support visualized:</summary>
+
+  ![example gif](example.gif)
+</details>
 
 
 ## Why?
 
-I started using `pomf.cat`, until I automatically uploaded a screenshot of my desktop with personal information in it. 
+I started using `pomf.cat` until I automatically uploaded a screenshot of my desktop with personal information in it through ShareX. 
 Since `pomf.cat` has no users, there was no way for me to delete this screenshot without mailing the owners of the site hoping they would listen (they did!). 
-At this point, I knew I could never use pomf.cat or untrusted service for this purpose again.  
-For videos, I used `streamable.com`. The size limit is better, but 13 dollar per month (per user) for permanent
-storage of short clips seemed a bit steep. 
-
-My friends and I share these clips among us. Sometimes we sit on teamspeak, drink beer and watch back old clips. With the new frontend
-and history of all our uploads, we can do this without looking through browser history and re-uploading.
+At this point, I knew I could never use pomf.cat or an untrusted service for this purpose again.  
+For videos, I used `streamable.com`. The size limit is better, but 13 dollar per month (per user!) for 
+a simple, permanent storage of video clips is *steep*. 
 
 TL;DR: Trust issues to external sites, price, permanent storage, frontend with our clips only. 
+
+
+|                                                        | **Klepp** | **Streamable** | **Pomf.cat** |
+|--------------------------------------------------------|-----------|----------------|--------------|
+| Frontend to browse friends videos<br/>(community feel) | ✅         | ❌              | ❌            |
+| Browse your own previous videos                        | ✅         | ✅              | ❌            |
+| Permanent storage                                      | ✅ (Cheap) | ✅ (Expensive)  | ❌            |
+| Own our own data                                       | ✅         | ❌              | ❌            | 
+
+
 
 ## But klepp..?
 Yes, we tend to yell "CLIP!" or "KLEPP!" whenever someone does something we think should be clipped (ShadowPlay) and shared after a game :)
 
+
 ## Cool!
-Keep in mind this all of this was done in a few days, without any thought of beautiful code or tests. 
-It is probably secure, but I wouldn't bet on it. 
+~~Keep in mind this all of this was done in a few days, without any thought of beautiful code or tests.~~ 
+This project has evolved and been rewritten to use databases, generate thumbnails, have likes, tags etc.
+However, this project is more about learning together with friends, hacking solutions and make things work than writing 
+beautiful and well tested enterprise code. 
+
+The authentication and token validation is inspired by [FastAPI-Azure-Auth](https://github.com/Intility/fastapi-azure-auth), 
+a python package written by me. If you'd like to use Cognito authentication in your FastAPI app, I suggest you
+look at that package instead of this repository, as I have not ported any tests over to this app. 
+This API is probably secure, but I wouldn't bet in it. When it comes to security, you either test it or don't trust it, simple as that.
+
+## The future
+A lot of improvements can be done, but here's a few that I've been thinking about:
+
+* Generate thumbnails using lambda instead of using the API container
+* Pre-sign URLs and upload directly to S3 instead of through the S3 bucket
+  * Use lambda to generate metadata in the database (using the Klepp-API)
+* Infrastructure as Code 
+* Multi-tenancy/groups to allow multiple communities
