@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  postgres:
+    container_name: klepp_postgres
+    environment:
+      POSTGRES_USER: klepp
+      POSTGRES_PASSWORD: some-long-password-generate-here
+    image: postgres:12.7-alpine
+    ports:
+      - '127.0.0.1:5556:5432'
+    restart: always
+    volumes:
+      - database:/var/lib/postgresql/data
+volumes:
+  database:

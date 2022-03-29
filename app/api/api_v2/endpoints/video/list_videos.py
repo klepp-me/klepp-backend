@@ -20,6 +20,7 @@ async def get_all_files(
     session: AsyncSession = Depends(yield_db_session),
     user: CognitoUser | None = Depends(cognito_scheme_or_anonymous),
     username: Optional[str] = None,
+    name: Optional[str] = None,
     hidden: bool = False,
     tags: list[str] = Query(default=[], description='Comma seperated list of tag names'),
     offset: int = 0,
@@ -40,6 +41,8 @@ async def get_all_files(
     )
     if username:
         video_statement = video_statement.where(Video.user.has(name=username))  # type: ignore
+    if name:
+        video_statement = video_statement.where(Video.display_name.contains(name))  # type: ignore
     if user and hidden:
         video_statement = video_statement.where(
             and_(Video.hidden == True, Video.user.has(name=user.username)),  # type:ignore  # noqa
