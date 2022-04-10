@@ -98,7 +98,7 @@ async def upload_file(
     # Add to DB and fetch it
     db_video: Video = Video(
         path=s3_path,
-        display_name=upload_file_name,
+        display_name=upload_file_name.split('.mp4')[0],
         user=user,
         user_id=user.id,
         uri=video_uri,
