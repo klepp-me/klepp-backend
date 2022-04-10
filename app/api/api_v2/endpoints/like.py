@@ -28,11 +28,7 @@ async def add_like(
     """
     Add a like to a video
     """
-    video_statement = (
-        select(Video)
-        .where(and_(Video.path == path.path, Video.hidden == False))  # noqa
-        .options(selectinload(Video.likes))
-    )
+    video_statement = select(Video).where(Video.path == path.path).options(selectinload(Video.likes))  # noqa
     result = await db_session.exec(video_statement)  # type: ignore
     video: Video | None = result.one_or_none()
     if not video:
@@ -61,7 +57,6 @@ async def delete_like(
         .where(
             and_(
                 Video.path == path.path,
-                Video.hidden == False,  # noqa
                 Video.likes.any(name=user.name),  # type: ignore
             )
         )
