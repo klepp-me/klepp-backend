@@ -8,6 +8,13 @@ from sqlmodel import Field, Relationship, SQLModel
 ResponseModel = TypeVar('ResponseModel')
 
 
+def generate_expire_at() -> datetime:
+    """
+    Generate util for video expiry date
+    """
+    return datetime.utcnow() + timedelta(weeks=12)
+
+
 class ListResponse(GenericModel, Generic[ResponseModel]):
     total_count: int
     response: list[ResponseModel]
@@ -62,10 +69,10 @@ class VideoBase(SQLModel):
     path: str = Field(primary_key=True, nullable=False, description='s3 path, primary key')
     display_name: str = Field(index=True, description='Display name of the video')
     hidden: bool = Field(default=False, description='Whether the file can be seen by anyone on the frontpage')
-    uploaded_at: datetime = Field(default=datetime.now(), description='When the file was uploaded')
+    uploaded_at: datetime = Field(default_factory=datetime.utcnow, description='When the file was uploaded')
     uri: str = Field(..., description='Link to the video')
     expire_at: Optional[datetime] = Field(
-        datetime.now() + timedelta(weeks=12), nullable=True, description='When the file is to be deleted'
+        nullable=True, description='When the file is to be deleted', default_factory=generate_expire_at
     )
 
 
