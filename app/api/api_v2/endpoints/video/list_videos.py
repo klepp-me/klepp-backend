@@ -22,7 +22,7 @@ async def get_all_files(
     username: Optional[str] = None,
     name: Optional[str] = None,
     hidden: bool = False,
-    tags: list[str] = Query(default=[], description='Comma seperated list of tag names'),
+    tag: list[str] = Query(default=[]),
     offset: int = 0,
     limit: int = Query(default=100, lte=100),
 ) -> dict[str, int | list]:
@@ -50,8 +50,8 @@ async def get_all_files(
     else:
         video_statement = video_statement.where(Video.hidden == False)  # noqa
 
-    for tag in tags:
-        video_statement = video_statement.where(Video.tags.any(name=tag))  # type: ignore
+    for t in tag:
+        video_statement = video_statement.where(Video.tags.any(name=t))  # type: ignore
 
     # Total count query based on query params, without pagination
     count_statement = select(func.count('*')).select_from(video_statement)  # type: ignore
