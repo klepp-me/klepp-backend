@@ -18,8 +18,8 @@ router = APIRouter()
 class VideoPatch(BaseModel):
     path: str
     display_name: Optional[str] = Field(default=None, regex=r'^[\s\w\d_-]*$', min_length=2, max_length=40)
-    hidden: bool = Field(default=False)
-    tags: list[TagBase] = Field(default=[])
+    hidden: Optional[bool] = Field(default=None)
+    tags: Optional[list[TagBase]] = Field(default=None)
 
 
 @router.patch('/files', response_model=VideoRead)
@@ -32,6 +32,8 @@ async def patch_video(
     Partially update a video.
     """
     excluded = video_patch.dict(exclude_unset=True)
+    [excluded.pop(x) for x in [key for key, value in excluded.items() if value is None]]
+
     query_video = (
         select(Video)
         .where(and_(Video.path == video_patch.path, Video.user_id == user.id))
