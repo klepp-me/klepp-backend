@@ -2,7 +2,7 @@ import asyncio
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import and_, desc, func
+from sqlalchemy import and_, desc, func, or_
 from sqlalchemy.orm import selectinload
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -50,8 +50,8 @@ async def get_all_files(
     else:
         video_statement = video_statement.where(Video.hidden == False)  # noqa
 
-    for t in tag:
-        video_statement = video_statement.where(Video.tags.any(name=t))  # type: ignore
+    if tag:
+        video_statement = video_statement.where(or_(Video.tags.any(name=t) for t in tag))  # type: ignore
 
     # Total count query based on query params, without pagination
     count_statement = select(func.count('*')).select_from(video_statement)  # type: ignore

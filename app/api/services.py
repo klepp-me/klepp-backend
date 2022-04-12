@@ -21,7 +21,7 @@ async def generate_video_thumbnail(path: str, name: str) -> StreamSpec:
     """
     Cuts first frame and generates a new file
     """
-    return ffmpeg.input(path).filter('scale', 420, -1).output(name, vframes=1)
+    return ffmpeg.input(path).filter('scale', 840, -1).output(name, vframes=1)
 
 
 async def await_ffmpeg(function: Callable) -> None:
