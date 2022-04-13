@@ -21,7 +21,7 @@ async def get_all_files(
     user: CognitoUser | None = Depends(cognito_scheme_or_anonymous),
     username: Optional[str] = None,
     name: Optional[str] = None,
-    hidden: bool = False,
+    hidden: Optional[bool] = None,
     tag: list[str] = Query(default=[]),
     offset: int = 0,
     limit: int = Query(default=100, lte=100),
@@ -43,11 +43,22 @@ async def get_all_files(
         video_statement = video_statement.where(Video.user.has(name=username))  # type: ignore
     if name:
         video_statement = video_statement.where(Video.display_name.contains(name))  # type: ignore
-    if user and hidden:
+
+    if user and hidden is None:
+        # Default behavior, include your own hidden videos
+        video_statement = video_statement.where(
+            or_(
+                and_(Video.hidden == True, Video.user.has(name=user.username)),  # type:ignore  # noqa
+                Video.hidden == False,
+            )
+        )
+    elif user and hidden:
+        # Only show your own hidden videos
         video_statement = video_statement.where(
             and_(Video.hidden == True, Video.user.has(name=user.username)),  # type:ignore  # noqa
         )
     else:
+        # Do not show any hidden videos
         video_statement = video_statement.where(Video.hidden == False)  # noqa
 
     if tag:
