@@ -23,13 +23,14 @@ async def get_all_files(
     name: Optional[str] = None,
     hidden: Optional[bool] = None,
     tag: list[str] = Query(default=[]),
+    path: Optional[str] = Query(default=None, description='Exact match. Reflects a `files/{path}` API.'),
     offset: int = 0,
     limit: int = Query(default=100, lte=100),
 ) -> dict[str, int | list]:
     """
     Get a list of all non-hidden files, unless you're the owner of the file, then you can request
     hidden files.
-    Works both as anonymous user and as a signed in user.
+    Works both as anonymous user and as a signed-in user.
     """
     # Video query
     video_statement = (
@@ -39,6 +40,15 @@ async def get_all_files(
         .options(selectinload(Video.likes))
         .order_by(desc(Video.uploaded_at))
     )
+    if path:
+        # Short route, specific path requested. This cannot be a `files/{path}` API due to `/` in video paths.
+        video_statement = video_statement.where(Video.path == path)
+        video_response = await session.exec(video_statement)  # type: ignore
+        video = []
+        if found := video_response.one_or_none():
+            video.append(found)
+        return {'total_count': len(video), 'response': video}
+
     if username:
         video_statement = video_statement.where(Video.user.has(name=username))  # type: ignore
     if name:
