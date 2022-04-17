@@ -7,9 +7,9 @@ from sqlalchemy.orm import selectinload
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from api.services import fetch_one_or_none_video
 from app.api.dependencies import yield_db_session
 from app.api.security import cognito_signed_in
+from app.api.services import fetch_one_or_none_video
 from app.models.klepp import User, Video, VideoRead
 
 router = APIRouter()

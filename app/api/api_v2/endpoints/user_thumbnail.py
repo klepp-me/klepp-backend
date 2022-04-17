@@ -9,10 +9,9 @@ from aiofiles import os
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from api.services import generate_user_thumbnail
 from app.api.dependencies import get_boto, yield_db_session
 from app.api.security import cognito_signed_in
-from app.api.services import await_ffmpeg
+from app.api.services import await_ffmpeg, generate_user_thumbnail
 from app.core.config import settings
 from app.models.klepp import User, UserRead
 
