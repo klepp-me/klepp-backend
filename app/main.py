@@ -6,6 +6,7 @@ from app.api.api_v2.api import api_router as api_v2_router
 from app.api.security import cognito_scheme
 from app.core.config import settings
 from app.core.logging_config import setup_logging
+from app.render.urls import api_router as render_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -30,3 +31,4 @@ if settings.BACKEND_CORS_ORIGINS:
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 app.include_router(api_v2_router, prefix=settings.API_V2_STR)
+app.include_router(render_router)
