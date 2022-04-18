@@ -2,25 +2,36 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta property="og:title" content="Klepp"/>
+    <title>Klepp.me - {{video_dict.display_name}}</title>
+    <meta property="og:title" content="Klepp {{video_dict.name}}"/>
     <meta property="og:type" content="website"/>
-    <meta property="og:url" content="https://gg.klepp.me/{{path}}"/>
-    <meta property="og:video" content="https://gg.klepp.me/{{path}}"/>
-    <meta property="og:video:type" content="application/x-shockwave-flash">
-    <meta property="og:video:width" content="398">
-    <meta property="og:video:height" content="264">
-    <meta property="og:image" content="https://klepp.me/favicon.ico"/>
+    <meta property="og:url" content="{{video_dict.uri}}"/>
+    <meta property="og:video" content="{{video_dict.uri}}"/>
+
+    <meta property="og:image" content="{{video_dict.thumbnail_uri}}"/>
     <meta name="theme-color" content="#FF0000">
-    <title>Klepp video</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+    <meta property="og:site_name" content="Klepp.me"/>
+    <meta property="og:title" content="{{video_dict.display_name}}" />
+    <meta name="description" content="Watch &#34;{{video_dict.display_name}}&#34; on Klepp.me">
+    <link rel="shortcut icon" href="https://klepp.me/favicon.ico">
+    <meta property="og:type" content="video.other">
+    <meta property="og:image" content="{{video_dict.thumbnail_uri}}" />
+    <meta property="og:image:secure_url" content="{{video_dict.thumbnail_uri}}" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:updated_time" content="{{video_dict.uploaded_at}}" />
+    <meta property="og:url" content="{{video_dict.uri}}">
     <style>
-    body {background: linear-gradient(90deg,#0f2027,#36474f 50%,#2c5364)}
+    body {background: linear-gradient(90deg,#0f2027,#36474f 50%,#2c5364);}
     .videoplayer {width: 100%; height: 100%}
+    #videocontrols {width: 100%; height: 100%;}
     </style>
 </head>
 <body>
 <div class="videoplayer">
-    <video controls>
-        <source src="https://gg.klepp.me/{{path}}" type="video/mp4">
+    <video controls id="videocontrols">
+        <source src="{{ video_dict.uri }}" type="video/mp4">
         Your browser does not support the video tag.
     </video>
 </div>
