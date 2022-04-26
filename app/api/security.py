@@ -4,10 +4,16 @@ which I'm the author of. However, this specific project has been written in a da
 security. If you're using this library as inspiration for anything, please keep that in mind.
 """
 
+import base64
 import logging
+import secrets
 from datetime import datetime, timedelta
 from typing import Any
 
+from cryptography.fernet import Fernet
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2AuthorizationCodeBearer, SecurityScopes
 from fastapi.security.base import SecurityBase
@@ -23,6 +29,9 @@ from app.api.dependencies import yield_db_session
 from app.core.config import settings
 from app.models.klepp import User
 from app.schemas.schemas_v1.user import User as CognitoUser
+from schemas.schemas_v2.api_key import APIKeyAndSalt
+
+backend = default_backend()
 
 
 class InvalidAuth(HTTPException):
@@ -224,3 +233,25 @@ async def cognito_signed_in(
         await db_session.refresh(new_user)
         return new_user
     return user  # type: ignore
+
+
+def get_fernet(salt: bytes) -> Fernet:
+    """
+    Returns a fernet that can be used for encrypting and decrypting a byte string.
+    """
+    hkdf = HKDF(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=salt,
+        info=b'klepp',
+        backend=backend,
+    )
+    fernet_key = hkdf.derive(settings.SECRET_KEY.encode())
+    return Fernet(base64.urlsafe_b64encode(fernet_key))
+
+
+def generate_api_key_internals() -> APIKeyAndSalt:
+    """
+    Generate a new API key and salt
+    """
+    return APIKeyAndSalt(api_key=secrets.token_urlsafe(32).encode(), salt=secrets.token_urlsafe(32).encode())

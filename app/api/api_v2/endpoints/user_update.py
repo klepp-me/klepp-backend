@@ -9,16 +9,16 @@ from aiofiles import os
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from api.security import cognito_signed_in, generate_api_key_internals, get_fernet
 from app.api.dependencies import get_boto, yield_db_session
-from app.api.security import cognito_signed_in
 from app.api.services import await_ffmpeg, generate_user_thumbnail
 from app.core.config import settings
-from app.models.klepp import User, UserRead
+from app.models.klepp import ListResponse, User, UserRead, UserReadAPIKey
 
 router = APIRouter()
 
 
-@router.put('/user', response_model=UserRead, status_code=status.HTTP_201_CREATED)
+@router.put('/me', response_model=UserRead, status_code=status.HTTP_201_CREATED)
 async def user_thumbnail(
     file: UploadFile = File(..., description='File to upload'),
     user: User = Depends(cognito_signed_in),
@@ -70,3 +70,21 @@ async def user_thumbnail(
     await db_session.commit()
     await db_session.refresh(user)
     return user.dict()
+
+
+@router.post('/me/generate-api-key', response_model=ListResponse[UserReadAPIKey], dependencies=[])
+async def api_key(
+    db_session: AsyncSession = Depends(yield_db_session),
+    user: User = Depends(cognito_signed_in),
+) -> User:
+    """
+    Get a list of users
+    """
+    api_key_and_salt = generate_api_key_internals()
+    user.api_key = get_fernet(api_key_and_salt.salt).encrypt(api_key_and_salt.api_key)
+    user.salt = api_key_and_salt.salt
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
+    user.api_key = api_key_and_salt.api_key
+    return user
