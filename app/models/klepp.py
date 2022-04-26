@@ -45,6 +45,12 @@ class User(UserBase, table=True):
     id: Optional[uuid.UUID] = Field(default_factory=uuid.uuid4, primary_key=True, index=True, nullable=False)
     videos: List['Video'] = Relationship(back_populates='user')
     liked_videos: List['Video'] = Relationship(back_populates='likes', link_model=VideoLikeLink)
+    api_key: Optional[bytes] = Field(default=None, description='User API key, encrypted')
+    salt: Optional[bytes] = Field(default=None, description='The salt used to encrypt the API key with')
+
+
+class UserReadAPIKey(UserBase):
+    api_key: str = Field(description='API Key, non encrypted. Only visible once')
 
 
 class UserRead(UserBase):

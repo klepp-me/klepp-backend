@@ -14,7 +14,7 @@ router = APIRouter()
 
 @router.get('/users', response_model=ListResponse[UserRead], dependencies=[Depends(cognito_scheme_or_anonymous)])
 async def get_users(
-    session: AsyncSession = Depends(yield_db_session),
+    db_session: AsyncSession = Depends(yield_db_session),
     offset: int = 0,
     limit: int = Query(default=100, lte=100),
 ) -> dict[str, int | list]:
@@ -30,8 +30,8 @@ async def get_users(
     tag_statement = tag_statement.offset(offset=offset).limit(limit=limit)
     # Do DB requests async
     tasks = [
-        asyncio.create_task(session.exec(tag_statement)),  # type: ignore
-        asyncio.create_task(session.exec(count_statement)),
+        asyncio.create_task(db_session.exec(tag_statement)),  # type: ignore
+        asyncio.create_task(db_session.exec(count_statement)),
     ]
     results, count = await asyncio.gather(*tasks)
     count_number = count.one_or_none()
