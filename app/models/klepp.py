@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Generic, TypeVar
 
 from pydantic import BaseModel
+from sqlalchemy import Column, DateTime
 from sqlmodel import Field, Relationship, SQLModel
 
 ResponseModel = TypeVar('ResponseModel')
@@ -70,11 +71,15 @@ class VideoBase(SQLModel):
     display_name: str = Field(index=True, description='Display name of the video')
     hidden: bool = Field(default=False, description='Whether the file can be seen by anyone on the frontpage')
     uploaded_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc), description='When the file was uploaded'
+        default_factory=lambda: datetime.now(timezone.utc),
+        description='When the file was uploaded',
+        sa_column=Column(DateTime(timezone=True)),
     )
     uri: str = Field(..., description='Link to the video')
     expire_at: datetime | None = Field(
-        nullable=True, description='When the file is to be deleted', default_factory=generate_expire_at
+        description='When the file is to be deleted',
+        default_factory=generate_expire_at,
+        sa_column=Column(DateTime(timezone=True), nullable=True),
     )
 
 
