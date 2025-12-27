@@ -1,5 +1,3 @@
-import asyncio
-
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import desc, func
 from sqlmodel import select
@@ -28,11 +26,9 @@ async def get_users(
 
     # Add pagination
     tag_statement = tag_statement.offset(offset=offset).limit(limit=limit)
-    # Do DB requests async
-    tasks = [
-        asyncio.create_task(session.exec(tag_statement)),  # type: ignore
-        asyncio.create_task(session.exec(count_statement)),
-    ]
-    results, count = await asyncio.gather(*tasks)
+
+    # Execute queries sequentially (SQLAlchemy 2.0 AsyncSession doesn't support concurrent operations)
+    results = await session.exec(tag_statement)  # type: ignore
+    count = await session.exec(count_statement)
     count_number = count.one_or_none()
     return {'total_count': count_number, 'response': results.all()}

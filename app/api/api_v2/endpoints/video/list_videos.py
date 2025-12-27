@@ -1,5 +1,3 @@
-import asyncio
-
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import and_, desc, func, or_
 from sqlalchemy.orm import selectinload
@@ -68,11 +66,9 @@ async def get_all_files(
 
     # Add pagination
     video_statement = video_statement.offset(offset=offset).limit(limit=limit)
-    # Do DB requests async
-    tasks = [
-        asyncio.create_task(session.exec(video_statement)),  # type: ignore
-        asyncio.create_task(session.exec(count_statement)),
-    ]
-    results, count = await asyncio.gather(*tasks)
+
+    # Execute queries sequentially (SQLAlchemy 2.0 AsyncSession doesn't support concurrent operations)
+    results = await session.exec(video_statement)  # type: ignore
+    count = await session.exec(count_statement)
     count_number = count.one_or_none()
     return {'total_count': count_number, 'response': results.all()}
