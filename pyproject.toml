@@ -84,9 +84,22 @@ select = [
 [tool.ruff.lint.isort]
 combine-as-imports = true
 
+[tool.ty.rules]
+# Ignore SQLAlchemy/SQLModel type issues - their stubs are flaky
+invalid-argument-type = "ignore"
+invalid-assignment = "ignore"
+invalid-return-type = "ignore"
+possibly-missing-attribute = "ignore"
+unknown-argument = "ignore"
+
 [tool.hatch.build.targets.wheel]
 packages = ["app"]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "ty>=0.0.7",
+]
