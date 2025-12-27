@@ -67,9 +67,9 @@ class OpenIdConfig:
                         status_code=status.HTTP_401_UNAUTHORIZED,
                         detail='Connection to Cognito is down. Unable to fetch provider configuration',
                         headers={'WWW-Authenticate': 'Bearer'},
-                    )
+                    ) from error
                 else:
-                    raise RuntimeError(f'Unable to fetch provider information. {error}')
+                    raise RuntimeError(f'Unable to fetch provider information. {error}') from error
 
             log.info('Loaded settings from Cognito.')
             log.info('Issuer:                 %s', self.issuer)
@@ -132,7 +132,7 @@ class CognitoAuthorizationCodeBearerBase(SecurityBase):
                 claims: dict[str, Any] = jwt.get_unverified_claims(token=access_token) or {}
             except Exception as error:
                 log.warning('Malformed token received. %s. Error: %s', access_token, error, exc_info=True)
-                raise InvalidAuth(detail='Invalid token format')
+                raise InvalidAuth(detail='Invalid token format') from error
 
             for scope in security_scopes.scopes:
                 token_scope_string = claims.get('scp', '')
@@ -184,17 +184,17 @@ class CognitoAuthorizationCodeBearerBase(SecurityBase):
                     return user
             except JWTClaimsError as error:
                 log.info('Token contains invalid claims. %s', error)
-                raise InvalidAuth(detail='Token contains invalid claims')
+                raise InvalidAuth(detail='Token contains invalid claims') from error
             except ExpiredSignatureError as error:
                 log.info('Token signature has expired. %s', error)
-                raise InvalidAuth(detail='Token signature has expired')
+                raise InvalidAuth(detail='Token signature has expired') from error
             except JWTError as error:
                 log.warning('Invalid token. Error: %s', error, exc_info=True)
-                raise InvalidAuth(detail='Unable to validate token')
+                raise InvalidAuth(detail='Unable to validate token') from error
             except Exception as error:
                 # Extra failsafe in case of a bug in a future version of the jwt library
                 log.exception('Unable to process jwt token. Uncaught error: %s', error)
-                raise InvalidAuth(detail='Unable to process token')
+                raise InvalidAuth(detail='Unable to process token') from error
             log.warning('Unable to verify token. No signing keys found')
             raise InvalidAuth(detail='Unable to verify token, no signing keys found')
         except (HTTPException, InvalidAuth):

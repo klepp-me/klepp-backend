@@ -1,6 +1,6 @@
 from logging.config import dictConfig
 
-from asgi_correlation_id import correlation_id_filter
+from asgi_correlation_id import CorrelationIdFilter
 
 from app.core.config import settings
 
@@ -8,7 +8,7 @@ LOGGING: dict = {
     'version': 1,
     'disable_existing_loggers': False,
     'filters': {
-        'correlation_id': {'()': correlation_id_filter(8 if settings.ENVIRONMENT == 'dev' else 32)},
+        'correlation_id': {'()': CorrelationIdFilter, 'uuid_length': 8 if settings.ENVIRONMENT == 'dev' else 32},
     },
     'formatters': {
         'console': {

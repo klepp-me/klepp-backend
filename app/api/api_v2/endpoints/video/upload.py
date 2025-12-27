@@ -1,6 +1,6 @@
 import asyncio
 import functools
-from typing import Any, Optional
+from typing import Any
 from uuid import uuid4
 
 import aiofiles
@@ -34,8 +34,8 @@ async def upload_video(boto_session: AioBaseClient, path: str, temp_video_name: 
 @router.post('/files', response_model=VideoRead, status_code=status.HTTP_201_CREATED)
 async def upload_file(
     file: UploadFile = File(..., description='File to upload'),
-    file_name: Optional[str] = Form(
-        default=None, example='my_file', regex=r'^[\s\w\d_-]*$', min_length=2, max_length=40
+    file_name: str | None = Form(
+        default=None, example='my_file', pattern=r'^[\s\w\d_-]*$', min_length=2, max_length=40
     ),
     boto_session: AioBaseClient = Depends(get_boto),
     user: User = Depends(cognito_signed_in),

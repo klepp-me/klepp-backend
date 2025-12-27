@@ -1,8 +1,7 @@
 import datetime
-from typing import List
 from urllib.parse import quote
 
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.core.config import settings
 
@@ -10,8 +9,7 @@ from app.core.config import settings
 class FileName(BaseModel):
     file_name: str = Field(..., alias='fileName')
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class DeletedFileResponse(FileName):
@@ -23,7 +21,8 @@ class FileResponse(FileName):
     datetime: datetime.datetime
     username: str
 
-    @root_validator(pre=True)
+    @model_validator(mode='before')
+    @classmethod
     def extract_uri(cls, value: dict) -> dict:
         """
         Extract file_name and create an uri
@@ -33,7 +32,8 @@ class FileResponse(FileName):
 
 
 class HideFile(FileName):
-    @validator('file_name')
+    @field_validator('file_name')
+    @classmethod
     def validate_file_name(cls, value: str) -> str:
         """
         Validate file path is according to specification
@@ -44,7 +44,8 @@ class HideFile(FileName):
 
 
 class ShowFile(FileName):
-    @validator('file_name')
+    @field_validator('file_name')
+    @classmethod
     def validate_file_name(cls, value: str) -> str:
         """
         Validate file path is according to specification
@@ -59,8 +60,7 @@ class DeleteFile(FileName):
 
 
 class ListFilesResponse(BaseModel):
-    files: List[FileResponse] = Field(default=[])
-    hidden_files: List[FileResponse] = Field(default=[], alias='hiddenFiles')
+    files: list[FileResponse] = Field(default=[])
+    hidden_files: list[FileResponse] = Field(default=[], alias='hiddenFiles')
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)

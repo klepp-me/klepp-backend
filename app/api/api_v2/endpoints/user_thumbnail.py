@@ -73,4 +73,4 @@ async def user_thumbnail(
     db_session.add(user)
     await db_session.commit()
     await db_session.refresh(user)
-    return user.dict()
+    return user.model_dump()

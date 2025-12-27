@@ -1,68 +1,92 @@
-[tool.poetry]
+[project]
 name = "klepp"
 version = "0.1.0"
 description = "API for uploading/deleting S3 files"
 authors = [
-    "Jonas Krüger Svensson <jonas-ks@hotmail.com>",
+    {name = "Jonas Krüger Svensson", email = "jonas-ks@hotmail.com"},
 ]
 license = "MIT"
+requires-python = ">=3.10"
 
-[tool.poetry.dependencies]
-python = "3.10.4"
-fastapi = ">=0.72.0"
-cryptography = ">=35.0.0"
-python-jose = {extras = ["cryptography"], version = "^3.3.0"}
-uvicorn = {extras = ["standard"], version = "^0.13.4"}
-python-multipart = "^0.0.5"
-aiobotocore = "^2.1.0"
-aioboto3 = "^9.3.1"
-httpx = "^0.21.3"
-pydantic = "1.9.0"
-gunicorn = "^20.1.0"
-typed-ast = "^1.5.2"
-alembic = "^1.7.6"
-sqlmodel = "^0.0.6"
-asgi-correlation-id = "^1.1.2"
-asyncpg = "^0.25.0"
-greenlet = "^1.1.2"
-psycopg2 = "^2.9.3"
-aiofiles = "^0.8.0"
-asyncffmpeg = "^1.2.0"
-asynccpu = "^1.2.2"
-ffmpeg-python = "^0.2.0"
-Jinja2 = "^3.1.1"
-
-[tool.poetry.dev-dependencies]
-pre-commit = "^2.9.3"
-black = "^20.8b1"
-isort = "^5.8.0"
-mypy = ">=0.812"
-ipython = "^8.1.1"
-
-[tool.black]
-line-length = 120
-skip-string-normalization = true
-target-version = ['py37']
-include = '\.pyi?$'
-exclude = '''
-(
-    (\.eggs|\.git|\.hg|\.mypy_cache|\.tox|\.venv|\venv|\.github|\docs|\tests|\__pycache__)
-)
-'''
-
-[tool.isort]
-profile = "black"
-src_paths = ["app"]
-combine_as_imports = true
-line_length = 120
-sections = [
-    'FUTURE',
-    'STDLIB',
-    'THIRDPARTY',
-    'FIRSTPARTY',
-    'LOCALFOLDER',
+dependencies = [
+    "fastapi>=0.115.0",
+    "cryptography>=44.0.0",
+    "python-jose[cryptography]>=3.3.0",
+    "uvicorn[standard]>=0.34.0",
+    "python-multipart>=0.0.20",
+    "aiobotocore>=2.21.0",
+    "aioboto3>=14.0.0",
+    "httpx>=0.28.0",
+    "pydantic>=2.10.0",
+    "pydantic-settings>=2.12.0",
+    "gunicorn>=23.0.0",
+    "alembic>=1.14.0",
+    "sqlmodel>=0.0.22",
+    "asgi-correlation-id>=4.3.0",
+    "asyncpg>=0.30.0",
+    "greenlet>=3.1.0",
+    "psycopg2>=2.9.10",
+    "aiofiles>=24.1.0",
+    "asyncffmpeg>=1.2.0",
+    "asynccpu>=1.2.2",
+    "ffmpeg-python>=0.2.0",
+    "Jinja2>=3.1.5",
+    "charset-normalizer>=3.4.0",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pre-commit>=4.0.0",
+    "ipython>=8.0.0",
+    "ruff>=0.14.0",
+]
+
+[tool.ruff]
+fix = true
+line-length = 120
+
+[tool.ruff.format]
+docstring-code-format = true
+line-ending = "lf"
+quote-style = "single"
+
+[tool.ruff.lint]
+ignore = [
+    "ANN002",  # Missing type annotations for **args
+    "ANN003",  # Missing type annotations for **kwargs
+    "B008",    # Function call in default argument (needed for FastAPI Depends)
+    "COM812",  # Conflicts with formatter
+    "D100",    # Module docstrings
+    "D101",    # Class docstrings
+    "D104",    # Public package docstrings
+    "D107",    # Missing docstring in __init__
+    "D203",    # Conflicts with D211
+    "D213",    # Conflicts with D212
+    "EM101",   # Exception string literals
+    "TRY003",  # Custom exceptions for ValueError
+    "ISC001",  # Conflicts with formatter
+]
+select = [
+    "E",       # pycodestyle errors
+    "W",       # pycodestyle warnings
+    "F",       # Pyflakes
+    "I",       # isort
+    "B",       # flake8-bugbear
+    "C4",      # flake8-comprehensions
+    "UP",      # pyupgrade
+    "ARG",     # flake8-unused-arguments
+    "SIM",     # flake8-simplify
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/list_videos.py" = ["E712"]  # SQLAlchemy requires == for boolean comparisons
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"

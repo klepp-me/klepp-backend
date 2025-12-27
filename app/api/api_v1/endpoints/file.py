@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 from aiobotocore.client import AioBaseClient
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
@@ -78,8 +78,8 @@ async def show_file(
 @router.post('/files', response_model=FileResponse, status_code=status.HTTP_201_CREATED)
 async def upload_file(
     file: UploadFile = File(..., description='File to upload'),
-    file_name: Optional[str] = Form(
-        default=None, alias='fileName', example='my_file.mp4', regex=r'^[\s\w\d_-]*$', min_length=2, max_length=40
+    file_name: str | None = Form(
+        default=None, alias='fileName', example='my_file.mp4', pattern=r'^[\s\w\d_-]*$', min_length=2, max_length=40
     ),
     session: AioBaseClient = Depends(get_boto),
     user: User = Depends(cognito_scheme),

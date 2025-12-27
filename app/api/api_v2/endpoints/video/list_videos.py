@@ -1,5 +1,4 @@
 import asyncio
-from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import and_, desc, func, or_
@@ -19,9 +18,9 @@ router = APIRouter()
 async def get_all_files(
     session: AsyncSession = Depends(yield_db_session),
     user: CognitoUser | None = Depends(cognito_scheme_or_anonymous),
-    username: Optional[str] = None,
-    name: Optional[str] = None,
-    hidden: Optional[bool] = None,
+    username: str | None = None,
+    name: str | None = None,
+    hidden: bool | None = None,
     tag: list[str] = Query(default=[]),
     offset: int = 0,
     limit: int = Query(default=100, lte=100),

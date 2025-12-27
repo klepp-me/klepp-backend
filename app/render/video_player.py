@@ -28,15 +28,15 @@ async def render_video_page(
     """
     video_statement = (
         select(Video)
-        .options(selectinload(Video.user))
-        .options(selectinload(Video.tags))
-        .options(selectinload(Video.likes))
-        .order_by(desc(Video.uploaded_at))
+        .options(selectinload(Video.user))  # type: ignore[arg-type]
+        .options(selectinload(Video.tags))  # type: ignore[arg-type]
+        .options(selectinload(Video.likes))  # type: ignore[arg-type]
+        .order_by(desc(Video.uploaded_at))  # type: ignore[arg-type]
     )
     if path:
         # Short route, specific path requested. This cannot be a `files/{path}` API due to `/` in video paths.
         video_statement = video_statement.where(Video.path == path)
-        video_response = await session.exec(video_statement)  # type: ignore
+        video_response = await session.exec(video_statement)
         if found := video_response.one_or_none():
-            return templates.TemplateResponse('video.html', {'request': request, 'video_dict': found.dict()})
+            return templates.TemplateResponse('video.html', {'request': request, 'video_dict': found.model_dump()})
     return templates.TemplateResponse('404.html', {'request': request})

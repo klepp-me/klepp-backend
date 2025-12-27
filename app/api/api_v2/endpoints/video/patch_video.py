@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
@@ -17,9 +17,9 @@ router = APIRouter()
 
 class VideoPatch(BaseModel):
     path: str
-    display_name: Optional[str] = Field(default=None, regex=r'^[\s\w\d_-]*$', min_length=2, max_length=40)
-    hidden: Optional[bool] = Field(default=None)
-    tags: Optional[list[TagBase]] = Field(default=None)
+    display_name: str | None = Field(default=None, pattern=r'^[\s\w\d_-]*$', min_length=2, max_length=40)
+    hidden: bool | None = Field(default=None)
+    tags: list[TagBase] | None = Field(default=None)
 
 
 @router.patch('/files', response_model=VideoRead)
@@ -31,7 +31,7 @@ async def patch_video(
     """
     Partially update a video.
     """
-    excluded = video_patch.dict(exclude_unset=True)
+    excluded = video_patch.model_dump(exclude_unset=True)
     [excluded.pop(x) for x in [key for key, value in excluded.items() if value is None]]
 
     query_video = (

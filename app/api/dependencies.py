@@ -1,4 +1,4 @@
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 
 from aiobotocore.client import AioBaseClient
 from aiobotocore.session import get_session
