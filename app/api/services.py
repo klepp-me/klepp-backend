@@ -1,4 +1,4 @@
-from typing import Callable, Optional
+from collections.abc import Callable
 
 import ffmpeg
 from asynccpu import ProcessTaskPoolExecutor
@@ -12,9 +12,9 @@ from app.models.klepp import Video, VideoRead
 
 async def generate_user_thumbnail(path: str, name: str) -> StreamSpec:
     """
-    Cuts first frame and generates a new file
+    Scales and compresses user profile thumbnail
     """
-    return ffmpeg.input(path).filter('scale', 420, 420, force_original_aspect_ratio='decrease').output(name)
+    return ffmpeg.input(path).filter('scale', 420, 420, force_original_aspect_ratio='decrease').output(name, qscale=3)
 
 
 async def generate_video_thumbnail(path: str, name: str) -> StreamSpec:
@@ -34,16 +34,16 @@ async def await_ffmpeg(function: Callable) -> None:
         await executor.create_process_task(ffmpeg_coroutine.execute, function)
 
 
-async def fetch_one_or_none_video(video_path: str, db_session: AsyncSession) -> Optional[VideoRead]:
+async def fetch_one_or_none_video(video_path: str, db_session: AsyncSession) -> VideoRead | None:
     """
     Takes a video path and fetches everything about it.
     """
     query_video = (
         select(Video)
         .where(Video.path == video_path)
-        .options(selectinload(Video.user))
-        .options(selectinload(Video.tags))
-        .options(selectinload(Video.likes))
+        .options(selectinload(Video.user))  # type: ignore[arg-type]
+        .options(selectinload(Video.tags))  # type: ignore[arg-type]
+        .options(selectinload(Video.likes))  # type: ignore[arg-type]
     )
-    result = await db_session.exec(query_video)  # type: ignore
-    return result.one_or_none()
+    result = await db_session.exec(query_video)
+    return result.one_or_none()  # type: ignore[return-value]

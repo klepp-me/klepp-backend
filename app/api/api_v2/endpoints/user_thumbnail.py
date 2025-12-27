@@ -37,16 +37,16 @@ async def user_thumbnail(
 
     # Save thumbnail
     temp_name = uuid4().hex
-    output_name = f'{temp_name}.png'
+    output_name = f'{temp_name}.jpg'
     async with aiofiles.open(temp_name, 'wb') as img:
         while content := await file.read(1024):
-            await img.write(content)  # type: ignore
+            await img.write(content)
     # Scale it
     await await_ffmpeg(functools.partial(generate_user_thumbnail, temp_name, output_name))
 
     # Upload thumbnail, delete original, delete old thumbnail in s3
     profile_pic_path = f'{user.name}/profile/{output_name}'
-    async with aiofiles.open(temp_name, 'rb+') as thumbnail_img:
+    async with aiofiles.open(output_name, 'rb+') as thumbnail_img:
         await boto_session.put_object(
             Bucket=settings.S3_BUCKET_URL,
             Key=profile_pic_path,
@@ -55,15 +55,19 @@ async def user_thumbnail(
         )
 
     # Cleanup
-    remove_original = asyncio.create_task(os.remove(temp_name))
-    remove_thumbnail = asyncio.create_task(os.remove(output_name))
+    tasks = [
+        asyncio.create_task(os.remove(temp_name)),
+        asyncio.create_task(os.remove(output_name)),
+    ]
     if user.thumbnail_uri:
-        delete_old_s3_thumbnail = asyncio.create_task(
-            boto_session.delete_object(
-                Bucket=settings.S3_BUCKET_URL, Key=user.thumbnail_uri.split('https://gg.klepp.me/')[1]
+        tasks.append(
+            asyncio.create_task(
+                boto_session.delete_object(
+                    Bucket=settings.S3_BUCKET_URL, Key=user.thumbnail_uri.split('https://gg.klepp.me/')[1]
+                )
             )
         )
-    await asyncio.gather(remove_original, remove_thumbnail, delete_old_s3_thumbnail)
+    await asyncio.gather(*tasks)
 
     user.thumbnail_uri = f'https://gg.klepp.me/{profile_pic_path}'
     db_session.add(user)
